@@ -1,0 +1,19 @@
+Il file index.html dovrà essere eliminato 
+
+la POST va sistemata per la reale necessità. 
+
+Che device devo registrare? solo i tre sensori? 
+
+Remember to always use SenML as data format:
+{
+"bn": "http://example.org/sensor1/",
+"e": [
+{
+"n": "temperature",
+"u": "Cel",
+"t": 1234,
+"v":22.5
+}
+]
+}
+

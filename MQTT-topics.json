@@ -1,0 +1,18 @@
+{
+	"Topics": [{
+		"SensorType": "temperature",
+		"measureType": "temp",
+		"deviceID": "1",
+		"unit": "C"
+	}, {
+		"SensorType": "humidity",
+		"measureType": "hum",
+		"deviceID": "2",
+		"unit": "%"
+	}, {
+		"SensorType": "CO2",
+		"measureType": "%",
+		"deviceID": "3",
+		"unit": "%"
+	}]
+}
