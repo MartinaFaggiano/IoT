@@ -1,0 +1,22 @@
+{
+	"sensorsList": [
+		{
+			"sensorName": "Temp1",
+			"measureType": "temp",
+			"deviceID": "1",
+			"unit": "C"
+		},
+		{
+			"sensorName": "Humidity1",
+			"measureType": "hum",
+			"deviceID": "1",
+			"unit": "%"
+		},
+		{
+			"sensorName": "CO2_1",
+			"measureType": "level",
+			"deviceID": "1",
+			"unit": "%"
+		}
+	]
+}

@@ -1,8 +1,3 @@
-Il file index.html dovrà essere eliminato 
-
-la POST va sistemata per la reale necessità. 
-
-Che device devo registrare? solo i tre sensori? 
 
 Remember to always use SenML as data format:
 {
