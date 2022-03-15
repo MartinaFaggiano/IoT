@@ -27,6 +27,10 @@ class HomeCatalog(object):
         for sensor in data["sensorsList"]:
             self.sensors.append(sensor)
 
+        data = json.load(open("schedule.json"))
+        self.schedules = []
+        for schedule in data["schedules"]:
+            self.schedules.append(schedule)
 
     exposed = True
     def GET(self, *uri, **params):
@@ -37,9 +41,11 @@ class HomeCatalog(object):
             elif uri[0]=="topicsList":
                 return json.dumps(self.topics)
 
-
             elif uri[0] == "devicesList":       
                 return json.dumps(self.devices)
+
+            elif uri[0] == "schedules":       
+                return json.dumps(self.schedules)
     
 
     def POST(self, *uri, **params):

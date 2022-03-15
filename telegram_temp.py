@@ -6,6 +6,7 @@ import telepot
 from urllib import request
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
+import Home_Catalog as hc
 
 # immagazzina il token per il got telegram renbot
 
@@ -19,10 +20,10 @@ def on_chat_message(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                   [InlineKeyboardButton(text='Temperatura', callback_data='temp')],
-                   [InlineKeyboardButton(text='Umidità', callback_data='umid')],
-                   [InlineKeyboardButton(text='Pressione', callback_data='press')],
-                   [InlineKeyboardButton(text='Ultrasuoni', callback_data='ultra')],
+                   [InlineKeyboardButton(text='Temperature', callback_data='temp')],
+                   [InlineKeyboardButton(text='Umidity', callback_data='umid')],
+                   [InlineKeyboardButton(text='CO', callback_data='co')],
+                   [InlineKeyboardButton(text='Schedule', callback_data='sched')],
                    [InlineKeyboardButton(text='Flame Aanalogo', callback_data='flameA')],
                    [InlineKeyboardButton(text='Flame Digitale', callback_data='flameD')]
                ])
@@ -60,22 +61,37 @@ def on_callback_query(msg):
     elif(query_data == 'umid'):
         bot.sendMessage(from_id, text="L'Umidità è il: " + feeds[1]['field2'] + '%')
         
-    elif(query_data == 'press'):
+    elif(query_data == 'co'):
         bot.sendMessage(from_id, text='La Pressione è di: ' + feeds[1]['field3'] + ' mbar')
 
-    elif(query_data == 'ultra'):
-        bot.sendMessage(from_id, text="C'è qualcosa ad una distanza di: " + feeds[1]['field4'] + ' cm')
-        
-    elif(query_data == 'flameA'):
-        bot.sendMessage(from_id, text='Il sensore di luce misura: ' + feeds[1]['field5'] + ' di un range 0 -1024')
+    # elif(query_data == 'flameA'):
+    #     bot.sendMessage(from_id, text='Il sensore di luce misura: ' + feeds[1]['field5'] + ' di un range 0 -1024')
 
-    elif(query_data == 'flameD'):
+    # elif(query_data == 'flameD'):
 
-        if(feeds[1]['field6'] == '0'):
-            bot.sendMessage(from_id, text="Non c'è fiamma in casa")
+    #     if(feeds[1]['field6'] == '0'):
+    #         bot.sendMessage(from_id, text="Non c'è fiamma in casa")
     
-        elif(feeds[1]['field6'] == '1'):
-            bot.sendMessage(from_id, text="ATTENZIONE C'è PRESENZA DI FIAMMA IN CASA!")    
+    #     elif(feeds[1]['field6'] == '1'):
+    #         bot.sendMessage(from_id, text="ATTENZIONE C'è PRESENZA DI FIAMMA IN CASA!")    
+
+
+    if(query_data == 'sched'):
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data='get')],
+                [InlineKeyboardButton(text='Modifica orario', callback_data='post')]
+            ])
+
+        x = bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
+
+
+    if(query_data == 'get'):
+        reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
+        dataHome = reqHome.read().decode('utf-8')
+        data_dictHome = json.loads(dataHome)
+        bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
+        print(data_dictHome[0])
+        
         
 #inizializziamo le funzioni
 
