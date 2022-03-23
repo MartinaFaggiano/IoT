@@ -1,7 +1,9 @@
+from cgi import parse_header
 import json
 import logging
 import sys
 import time
+from matplotlib.font_manager import json_dump
 import telepot
 from urllib import request
 from telepot.loop import MessageLoop
@@ -92,22 +94,34 @@ def on_callback_query(msg):
         bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
         print(data_dictHome[0])
         
+        
+        
     if(query_data == 'post_schedule_heating'):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text='Morning', callback_data='post_schedule_heating_morning')],
-                [InlineKeyboardButton(text='Afternoon', callback_data='post_schedule_heating_afternoon')]
+                [InlineKeyboardButton(text='Afternoon', callback_data='post_schedule_heating_afternoon')],
                 [InlineKeyboardButton(text='Evening', callback_data='post_schedule_heating_evening')],
-                [InlineKeyboardButton(text='Night', callback_data='post_schedule_heating_night')]
+                [InlineKeyboardButton(text='Night', callback_data='post_schedule_heating_night')],
+                [InlineKeyboardButton(text='AllDay', callback_data='post_schedule_heating_allday')]
+            
             ])
 
         x = bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
-        
+    value = json.dumps( {"schedules": [
+        {
+            "deviceName": "HeatingSystem_1",
+            "startHour": "08:00:00",
+            "endHour": "12:00:00"
+        }]})    
+    
+    #AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
+    parse_header.urlencode(value).encode()
+
     if(query_data == 'post_schedule_heating_morning'):
-        reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
-        dataHome = reqHome.read().decode('utf-8')
-        data_dictHome = json.loads(dataHome)
-        bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
-        print(data_dictHome[0])
+        reqHome = request.Request('http://127.0.0.1:8080/post/schedule', value)
+        
+        bot.sendMessage(from_id, text= "tutto ok")
+        
         
     if(query_data == 'post_schedule_heating_afternoon'):
         reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
@@ -124,6 +138,13 @@ def on_callback_query(msg):
         print(data_dictHome[0])
         
     if(query_data == 'post_schedule_heating_night'):
+        reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
+        dataHome = reqHome.read().decode('utf-8')
+        data_dictHome = json.loads(dataHome)
+        bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
+        print(data_dictHome[0])
+        
+    if(query_data == 'post_schedule_heating_allday'):
         reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
         dataHome = reqHome.read().decode('utf-8')
         data_dictHome = json.loads(dataHome)

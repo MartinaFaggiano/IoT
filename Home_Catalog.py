@@ -84,7 +84,47 @@ class HomeCatalog(object):
                 json_file["schedules"] = self.schedules
                 print(json_file)
                 with open("schedule.json", "w") as file:
-                    json.dump(json_file, file)                   
+                    json.dump(json_file, file)       
+                    
+            elif uri[0] == "post/modify_schedule_morning": 
+                self.schedules.append(data)
+                json_file = json.load(open("schedule.json"))
+                json_file["modify_schedules"]["morning"] = self.schedules
+                print(json_file)
+                with open("schedule.json", "w") as file:
+                    json.dump(json_file, file)  
+                
+            elif uri[0] == "post/modify_schedule_afternoon": 
+                self.schedules.append(data)
+                json_file = json.load(open("schedule.json"))
+                json_file["modify_schedules"]["afternoon"] = self.schedules
+                print(json_file)
+                with open("schedule.json", "w") as file:
+                    json.dump(json_file, file)  
+                    
+            elif uri[0] == "post/modify_schedule_evening": 
+                self.schedules.append(data)
+                json_file = json.load(open("schedule.json"))
+                json_file["modify_schedules"]["evening"] = self.schedules
+                print(json_file)
+                with open("schedule.json", "w") as file:
+                    json.dump(json_file, file)  
+                    
+            elif uri[0] == "post/modify_schedule_night": 
+                self.schedules.append(data)
+                json_file = json.load(open("schedule.json"))
+                json_file["modify_schedules"]["night"] = self.schedules
+                print(json_file)
+                with open("schedule.json", "w") as file:
+                    json.dump(json_file, file)     
+                    
+            elif uri[0] == "post/modify_schedule_allday": 
+                self.schedules.append(data)
+                json_file = json.load(open("schedule.json"))
+                json_file["modify_schedules"]["allday"] = self.schedules
+                print(json_file)
+                with open("schedule.json", "w") as file:
+                    json.dump(json_file, file)         
 
 
         # data = cherrypy.request.body.read()
