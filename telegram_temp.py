@@ -78,19 +78,58 @@ def on_callback_query(msg):
 
     if(query_data == 'sched'):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data='get')],
-                [InlineKeyboardButton(text='Modifica orario', callback_data='post')]
+                [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data='get_schedule_heating')],
+                [InlineKeyboardButton(text='Modifica orario', callback_data='post_schedule_heating')]
             ])
 
         x = bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
 
 
-    if(query_data == 'get'):
+    if(query_data == 'get_schedule_heating'):
         reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
         dataHome = reqHome.read().decode('utf-8')
         data_dictHome = json.loads(dataHome)
         bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
         print(data_dictHome[0])
+        
+    if(query_data == 'post_schedule_heating'):
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Morning', callback_data='post_schedule_heating_morning')],
+                [InlineKeyboardButton(text='Afternoon', callback_data='post_schedule_heating_afternoon')]
+                [InlineKeyboardButton(text='Evening', callback_data='post_schedule_heating_evening')],
+                [InlineKeyboardButton(text='Night', callback_data='post_schedule_heating_night')]
+            ])
+
+        x = bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
+        
+    if(query_data == 'post_schedule_heating_morning'):
+        reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
+        dataHome = reqHome.read().decode('utf-8')
+        data_dictHome = json.loads(dataHome)
+        bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
+        print(data_dictHome[0])
+        
+    if(query_data == 'post_schedule_heating_afternoon'):
+        reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
+        dataHome = reqHome.read().decode('utf-8')
+        data_dictHome = json.loads(dataHome)
+        bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
+        print(data_dictHome[0])
+        
+    if(query_data == 'post_schedule_heating_evening'):
+        reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
+        dataHome = reqHome.read().decode('utf-8')
+        data_dictHome = json.loads(dataHome)
+        bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
+        print(data_dictHome[0])
+        
+    if(query_data == 'post_schedule_heating_night'):
+        reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
+        dataHome = reqHome.read().decode('utf-8')
+        data_dictHome = json.loads(dataHome)
+        bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
+        print(data_dictHome[0])
+       
         
         
 #inizializziamo le funzioni

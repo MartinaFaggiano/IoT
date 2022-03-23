@@ -4,6 +4,13 @@
             "deviceName": "HeatingSystem_1",
             "startHour": "08:00:00",
             "endHour": "20:00:00"
+        }], 
+        "modifica_schedules": [ {
+            "morning": "08:00:00-12:00:00",
+            "afternoon": "12:00:00-18:00:00",
+            "evening": "18:00:00-00:00:00",
+            "night": "00:00:00-08:00:00"
         }
+        
     ]
 }
