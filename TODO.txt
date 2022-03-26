@@ -40,6 +40,4 @@ TELEGRAM - Device connector
 
 
 DA FINIRE 
-post in home CATALOG e telegram bot per la schedule 
-
-dobbiamo finire la post del telegram bot per far si che cambi la schedule 
+Sistemare gestione file dell'Home Catalog 

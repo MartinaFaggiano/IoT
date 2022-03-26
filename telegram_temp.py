@@ -10,6 +10,8 @@ from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 import Home_Catalog as hc
 
+import requests
+
 # immagazzina il token per il got telegram renbot
 
 TOKEN = '5201662282:AAEdEc4GJQMrOEpTwXNtf8OgZ1rwfak4mhg'
@@ -88,7 +90,7 @@ def on_callback_query(msg):
 
 
     if(query_data == 'get_schedule_heating'):
-        reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
+        reqHome = request.urlopen('http://127.0.0.1:8080/getSchedules')
         dataHome = reqHome.read().decode('utf-8')
         data_dictHome = json.loads(dataHome)
         bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
@@ -107,18 +109,27 @@ def on_callback_query(msg):
             ])
 
         x = bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
-    value = json.dumps( {"schedules": [
+    
+
+
+
+
+    if(query_data == 'post_schedule_heating_morning'):
+
+        json_data = json.dumps( {"schedules": [
         {
             "deviceName": "HeatingSystem_1",
             "startHour": "08:00:00",
             "endHour": "12:00:00"
-        }]})    
-    
-    #AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
-    parse_header.urlencode(value).encode()
+        }]})  
 
-    if(query_data == 'post_schedule_heating_morning'):
-        reqHome = request.Request('http://127.0.0.1:8080/post/schedule', value)
+        r = requests.post('http://127.0.0.1:8080/postSchedule', 
+                data=json_data,
+            )
+    
+        # # parse_header.urlencode(value).encode()
+        
+        # reqHome = request.Request('http://127.0.0.1:8080/post/schedule', value)
         
         bot.sendMessage(from_id, text= "tutto ok")
         
