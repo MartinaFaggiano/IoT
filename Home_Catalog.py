@@ -51,10 +51,44 @@ class HomeCatalog(object):
             elif uri[0] == "getModifyMorning":    
                 data = json.load(open("schedule.json"))
                 self.schedules = []
-                for schedule in data["schedules"]:
-                    self.schedules.append(schedule)
+                modify_morning = data["modify_schedules"]['morning']
+                self.schedules.append(modify_morning)
    
                 return json.dumps(self.schedules)
+            
+            elif uri[0] == "getModifyAfternoon":    
+                data = json.load(open("schedule.json"))
+                self.schedules = []
+                modify_afternoon = data["modify_schedules"]['afternoon']
+                self.schedules.append(modify_afternoon)
+   
+                return json.dumps(self.schedules)
+            
+            elif uri[0] == "getModifyEvening":    
+                data = json.load(open("schedule.json"))
+                self.schedules = []
+                modify_evening = data["modify_schedules"]['evening']
+                self.schedules.append(modify_evening)
+   
+                return json.dumps(self.schedules)
+             
+            elif uri[0] == "getModifyNight":    
+                data = json.load(open("schedule.json"))
+                self.schedules = []
+                modify_night = data["modify_schedules"]['night']
+                self.schedules.append(modify_night)
+   
+                return json.dumps(self.schedules)
+            
+            
+            elif uri[0] == "getModifyAllday":    
+                data = json.load(open("schedule.json"))
+                self.schedules = []
+                modify_allday = data["modify_schedules"]['allday']
+                self.schedules.append(modify_allday)
+   
+                return json.dumps(self.schedules)
+            
     
 
     def POST(self, *uri, **params):

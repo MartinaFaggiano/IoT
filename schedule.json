@@ -1,10 +1,16 @@
 {
     "schedules": [
         {
-            "deviceName": "HeatingSystem_1",
+            "deviceName": "Heating_system_1",
             "startHour": "08:00:00",
             "endHour": "10:00:00"
-        }
+        },
+        {
+            "deviceName": "Heating_system_1",
+            "startHour": "08:00:00",
+            "endHour": "10:00:00"
+        },
+        
     ],
     "modify_schedules": [
         {

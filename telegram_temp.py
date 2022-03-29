@@ -79,8 +79,31 @@ def on_callback_query(msg):
     #     elif(feeds[1]['field6'] == '1'):
     #         bot.sendMessage(from_id, text="ATTENZIONE C'è PRESENZA DI FIAMMA IN CASA!")    
 
+#AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
+# funzione che serve per impostare quale stanza usare
 
-    if(query_data == 'sched'):
+#  def on_chat_message(self, msg):
+#         content_type, chat_type, chat_ID = telepot.glance(msg)
+#         message = msg['text']
+#         if message == "/switchon":
+#             payload = self.__message.copy()
+#             payload['e'][0]['v'] = "on"
+#             payload['e'][0]['t'] = time.time()
+#             self.client.myPublish(self.topic, payload)
+#             self.bot.sendMessage(chat_ID, text="Led switched on")   #if I write on telegram /switchOn the bot reply to me with 'on'
+#         elif message == "/switchOff":
+#             payload = self.__message.copy()
+#             payload['e'][0]['v'] = "off"
+#             payload['e'][0]['t'] = time.time()
+#             self.client.myPublish(self.topic, payload)
+#             self.bot.sendMessage(chat_ID, text="Led switched off")   #if I write on telegram /switchOff the bot reply to me with 'off'
+#         elif message == "/sayHello":
+#             self.bot.sendMessage(chat_ID, text="Hello")
+#         else:
+#             self.bot.sendMessage(chat_ID, text="Command not supported")
+    if(query_data == 'choice_room'):
+        
+        
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data='get_schedule_heating')],
                 [InlineKeyboardButton(text='Modifica orario', callback_data='post_schedule_heating')]

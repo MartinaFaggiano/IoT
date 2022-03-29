@@ -40,3 +40,4 @@ TELEGRAM - Device connector
 
 
 DA FINIRE 
+Dobbiamo capire come integrare il codice del prof per scegliere la stanza da telegram 
