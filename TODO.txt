@@ -40,4 +40,3 @@ TELEGRAM - Device connector
 
 
 DA FINIRE 
-Sistemare gestione file dell'Home Catalog 

@@ -120,7 +120,7 @@ def on_callback_query(msg):
         {
             "deviceName": "HeatingSystem_1",
             "startHour": "08:00:00",
-            "endHour": "12:00:00"
+            "endHour": "11:00:00"
         }]})  
 
         r = requests.post('http://127.0.0.1:8080/postSchedule', 

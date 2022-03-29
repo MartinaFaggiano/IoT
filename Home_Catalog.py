@@ -12,19 +12,14 @@ import json
 class HomeCatalog(object):
 
     def __init__(self) -> None:
-          
-        self.devices = []
-        
-        self.topics = []
-        self.sensors = []
-        self.schedules = []
+          pass
 
-     
     exposed = True
     def GET(self, *uri, **params):
         if params=={} and len(uri)!=0:  
             if uri[0] == "getSensorsList":  
                 data = json.load(open("devices.json"))
+                self.sensors = []
                 for device in data["devicesList"]:
                     self.devices.append(device) 
                      
@@ -32,7 +27,7 @@ class HomeCatalog(object):
     
             elif uri[0]=="getTopicsList":
                 data = json.load(open("MQTT-topics.json"))
-        
+                self.topics = []
                 for topic in data["Topics"]:
                      self.topics.append(topic)
 
@@ -40,14 +35,22 @@ class HomeCatalog(object):
 
             elif uri[0] == "getDevicesList":   
                 data = json.load(open("sensors.json"))
-        
+                self.devices = []
                 for sensor in data["sensorsList"]:
                     self.sensors.append(sensor)    
                 return json.dumps(self.devices)
 
             elif uri[0] == "getSchedules":    
                 data = json.load(open("schedule.json"))
-        
+                self.schedules = []
+                for schedule in data["schedules"]:
+                    self.schedules.append(schedule)
+   
+                return json.dumps(self.schedules)
+
+            elif uri[0] == "getModifyMorning":    
+                data = json.load(open("schedule.json"))
+                self.schedules = []
                 for schedule in data["schedules"]:
                     self.schedules.append(schedule)
    
