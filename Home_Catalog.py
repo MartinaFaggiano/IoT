@@ -12,60 +12,45 @@ import json
 class HomeCatalog(object):
 
     def __init__(self) -> None:
-        data = json.load(open("devices.json"))
+          
         self.devices = []
-        for device in data["devicesList"]:
-            self.devices.append(device)  
         
-        data = json.load(open("MQTT-topics.json"))
         self.topics = []
-        for topic in data["Topics"]:
-            self.topics.append(topic)
-
-        data = json.load(open("sensors.json"))
         self.sensors = []
-        for sensor in data["sensorsList"]:
-            self.sensors.append(sensor)
-
-        data = json.load(open("schedule.json"))
         self.schedules = []
-        for schedule in data["schedules"]:
-            self.schedules.append(schedule)
 
-    # def reload (self):
-    #     data = json.load(open("devices.json"))
-    #     self.devices = []
-    #     for device in data["devicesList"]:
-    #         self.devices.append(device)  
-        
-    #     data = json.load(open("MQTT-topics.json"))
-    #     self.topics = []
-    #     for topic in data["Topics"]:
-    #         self.topics.append(topic)
-
-    #     data = json.load(open("sensors.json"))
-    #     self.sensors = []
-    #     for sensor in data["sensorsList"]:
-    #         self.sensors.append(sensor)
-
-    #     data = json.load(open("schedule.json"))
-    #     self.schedules = []
-    #     for schedule in data["schedules"]:
-    #         self.schedules.append(schedule)
-
+     
     exposed = True
     def GET(self, *uri, **params):
         if params=={} and len(uri)!=0:  
-            if uri[0] == "getSensorsList":        
+            if uri[0] == "getSensorsList":  
+                data = json.load(open("devices.json"))
+                for device in data["devicesList"]:
+                    self.devices.append(device) 
+                     
                 return json.dumps(self.sensors)
     
             elif uri[0]=="getTopicsList":
+                data = json.load(open("MQTT-topics.json"))
+        
+                for topic in data["Topics"]:
+                     self.topics.append(topic)
+
                 return json.dumps(self.topics)
 
-            elif uri[0] == "getDevicesList":       
+            elif uri[0] == "getDevicesList":   
+                data = json.load(open("sensors.json"))
+        
+                for sensor in data["sensorsList"]:
+                    self.sensors.append(sensor)    
                 return json.dumps(self.devices)
 
-            elif uri[0] == "getSchedules":       
+            elif uri[0] == "getSchedules":    
+                data = json.load(open("schedule.json"))
+        
+                for schedule in data["schedules"]:
+                    self.schedules.append(schedule)
+   
                 return json.dumps(self.schedules)
     
 
@@ -103,7 +88,7 @@ class HomeCatalog(object):
                 # self.schedules.append(data)
                 json_file = json.load(open("schedule.json"))
                 json_file["schedules"] = data["schedules"]
-                self.reload
+                
                 with open("schedule.json", "w") as file:
                     json.dump(json_file, file)       
                     
