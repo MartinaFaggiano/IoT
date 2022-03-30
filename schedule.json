@@ -1,53 +1,47 @@
 {
     "schedules": [
         {
-            "deviceName": "Heating_system_1",
+            "deviceName": "HeatingSystem_1",
             "startHour": "08:00:00",
-            "endHour": "10:00:00"
+            "endHour": "11:00:00"
         },
         {
-            "deviceName": "Heating_system_1",
+            "deviceName": "HeatingSystem_2",
             "startHour": "08:00:00",
-            "endHour": "10:00:00"
-        },
-        
+            "endHour": "11:00:00"
+        }
     ],
     "modify_schedules": [
         {
-            "morning":[
+            "morning": [
                 {
                     "startHour": "08:00:00",
                     "endHour": "10:00:00"
                 }
-
             ],
-            "afternoon":[
+            "afternoon": [
                 {
                     "startHour": "12:00:00",
                     "endHour": "16:00:00"
                 }
-
             ],
-            "evening":[
+            "evening": [
                 {
                     "startHour": "16:00:00",
                     "endHour": "20:00:00"
                 }
-
             ],
-            "night":[
+            "night": [
                 {
                     "startHour": "20:00:00",
                     "endHour": "08:00:00"
                 }
-
             ],
-            "allday":[
+            "allday": [
                 {
                     "startHour": "08:00:00",
                     "endHour": "24:00:00"
                 }
-
             ]
         }
     ]

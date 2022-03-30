@@ -67,50 +67,40 @@ def on_callback_query(msg):
         
     elif(query_data == 'co'):
         bot.sendMessage(from_id, text='La Pressione è di: ' + feeds[1]['field3'] + ' mbar')
-
-    # elif(query_data == 'flameA'):
-    #     bot.sendMessage(from_id, text='Il sensore di luce misura: ' + feeds[1]['field5'] + ' di un range 0 -1024')
-
-    # elif(query_data == 'flameD'):
-
-    #     if(feeds[1]['field6'] == '0'):
-    #         bot.sendMessage(from_id, text="Non c'è fiamma in casa")
-    
-    #     elif(feeds[1]['field6'] == '1'):
-    #         bot.sendMessage(from_id, text="ATTENZIONE C'è PRESENZA DI FIAMMA IN CASA!")    
-
-#AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
-# funzione che serve per impostare quale stanza usare
-
-#  def on_chat_message(self, msg):
-#         content_type, chat_type, chat_ID = telepot.glance(msg)
-#         message = msg['text']
-#         if message == "/switchon":
-#             payload = self.__message.copy()
-#             payload['e'][0]['v'] = "on"
-#             payload['e'][0]['t'] = time.time()
-#             self.client.myPublish(self.topic, payload)
-#             self.bot.sendMessage(chat_ID, text="Led switched on")   #if I write on telegram /switchOn the bot reply to me with 'on'
-#         elif message == "/switchOff":
-#             payload = self.__message.copy()
-#             payload['e'][0]['v'] = "off"
-#             payload['e'][0]['t'] = time.time()
-#             self.client.myPublish(self.topic, payload)
-#             self.bot.sendMessage(chat_ID, text="Led switched off")   #if I write on telegram /switchOff the bot reply to me with 'off'
-#         elif message == "/sayHello":
-#             self.bot.sendMessage(chat_ID, text="Hello")
-#         else:
-#             self.bot.sendMessage(chat_ID, text="Command not supported")
-    if(query_data == 'choice_room'):
         
+    if query_data == "sched":
+            buttons = [[InlineKeyboardButton(text=f'Roome number 1', callback_data=f'HeatingSystem_1'), 
+                    InlineKeyboardButton(text=f'Room number 2', callback_data=f'HeatingSystem_2')]]
+            keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+            bot.sendMessage(from_id, text='Choose a room', reply_markup=keyboard)
+            
+    if(query_data == "HeatingSystem_1"):
+            reqHome = request.urlopen('http://127.0.0.1:8080/getSchedulesRoomOne')
+            dataHome = reqHome.read().decode('utf-8')
+            data_dictHome = json.loads(dataHome)
+            print(data_dictHome)
+            bot.sendMessage(from_id, text="Schedule room one: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
+            
+    if(query_data == "HeatingSystem_2"):
+            reqHome = request.urlopen('http://127.0.0.1:8080/getSchedulesRoomTwo')
+            dataHome = reqHome.read().decode('utf-8')
+            data_dictHome = json.loads(dataHome)
+            bot.sendMessage(from_id, text= "You choose room number two")
+            
+            
+       
+    if('HeatingSystem' in query_data):
         
+        deviceName = query_data 
+          
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data='get_schedule_heating')],
+                [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data= deviceName)],
                 [InlineKeyboardButton(text='Modifica orario', callback_data='post_schedule_heating')]
             ])
 
         x = bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
-
+        
+       
 
     if(query_data == 'get_schedule_heating'):
         reqHome = request.urlopen('http://127.0.0.1:8080/getSchedules')
@@ -150,9 +140,6 @@ def on_callback_query(msg):
                 data=json_data,
             )
     
-        # # parse_header.urlencode(value).encode()
-        
-        # reqHome = request.Request('http://127.0.0.1:8080/post/schedule', value)
         
         bot.sendMessage(from_id, text= "tutto ok")
         
@@ -184,6 +171,78 @@ def on_callback_query(msg):
         data_dictHome = json.loads(dataHome)
         bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
         print(data_dictHome[0])
+
+    # elif(query_data == 'flameA'):
+    #     bot.sendMessage(from_id, text='Il sensore di luce misura: ' + feeds[1]['field5'] + ' di un range 0 -1024')
+
+    # elif(query_data == 'flameD'):
+
+    #     if(feeds[1]['field6'] == '0'):
+    #         bot.sendMessage(from_id, text="Non c'è fiamma in casa")
+    
+    #     elif(feeds[1]['field6'] == '1'):
+    #         bot.sendMessage(from_id, text="ATTENZIONE C'è PRESENZA DI FIAMMA IN CASA!")    
+
+#AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
+# funzione che serve per impostare quale stanza usare
+
+#  def on_chat_message(self, msg):
+#         content_type, chat_type, chat_ID = telepot.glance(msg)
+#         message = msg['text']
+#         if message == "/switchon":
+#             payload = self.__message.copy()
+#             payload['e'][0]['v'] = "on"
+#             payload['e'][0]['t'] = time.time()
+#             self.client.myPublish(self.topic, payload)
+#             self.bot.sendMessage(chat_ID, text="Led switched on")   #if I write on telegram /switchOn the bot reply to me with 'on'
+#         elif message == "/switchOff":
+#             payload = self.__message.copy()
+#             payload['e'][0]['v'] = "off"
+#             payload['e'][0]['t'] = time.time()
+#             self.client.myPublish(self.topic, payload)
+#             self.bot.sendMessage(chat_ID, text="Led switched off")   #if I write on telegram /switchOff the bot reply to me with 'off'
+#         elif message == "/sayHello":
+#             self.bot.sendMessage(chat_ID, text="Hello")
+#         else:
+#             self.bot.sendMessage(chat_ID, text="Command not supported")
+
+
+
+# class SwitchBot:
+#         def __init__(self, token, broker, port, topic):
+#         # Local token
+#         self.tokenBot = token
+#         # Catalog token
+#         # self.tokenBot=requests.get("http://catalogIP/telegram_token").json()["telegramToken"]
+#         self.bot = telepot.Bot(self.tokenBot)
+#         self.client = MyMQTT("telegramBotOrlando", broker, port, None)
+#         self.client.start()
+#         self.topic = topic
+#         self.__message = {'bn': "telegramBot",
+#                           'e':
+#                           [
+#                               {'n': 'switch', 'v': '', 't': '', 'u': 'bool'},
+#                           ]
+#                           }
+#         MessageLoop(self.bot, {'chat': self.on_chat_message,
+#                                'callback_query': self.on_callback_query}).run_as_thread()
+
+# def on_chat_message(self, msg):
+#         content_type, chat_type, chat_ID = telepot.glance(msg)
+#         message = msg['text']
+        
+
+# def on_callback_query(self,msg):
+#         query_ID , chat_ID , query_data = telepot.glance(msg,flavor='callback_query')
+
+        
+#         payload = self.__message.copy()
+#         payload['e'][0]['v'] = query_data
+#         payload['e'][0]['t'] = time.time()
+#         self.client.myPublish(self.topic, payload)
+#         self.bot.sendMessage(chat_ID, text=f"Led switched {query_data}")
+ 
+    
        
         
         
