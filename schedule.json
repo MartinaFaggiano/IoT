@@ -3,7 +3,7 @@
         {
             "deviceName": "HeatingSystem_1",
             "startHour": "08:00:00",
-            "endHour": "11:00:00"
+            "endHour": "12:00:00"
         },
         {
             "deviceName": "HeatingSystem_2",

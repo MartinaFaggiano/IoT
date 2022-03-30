@@ -1,3 +1,4 @@
+import sched
 import cherrypy
 import json
 
@@ -17,25 +18,35 @@ class HomeCatalog(object):
     exposed = True
     def GET(self, *uri, **params):
         
-        if params=={} and len(uri)!=0:
-            if uri[0] == 'getSchedulesRoomOne':
-                data = json.load(open("schedule.json"))
-                self.schedules = []
-                for schedule in data["schedules"]:
-                    self.schedules.append(schedule)
+        # if params=={} and len(uri)!=0:
+        #     if uri[0] == 'getSchedulesRoomOne':
+        #         data = json.load(open("schedule.json"))
+        #         self.schedules = []
+        #         for schedule in data["schedules"]:
+        #             self.schedules.append(schedule)
    
-                return json.dumps(self.schedules)
+        #         return json.dumps(self.schedules)
             
-        if params== {} and len(uri)!=0:
-            if uri[0] == 'getSchedulesRoomTwo':
+        # if params== {} and len(uri)!=0:
+        #     if uri[0] == 'getSchedulesRoomTwo':
+        #         data = json.load(open("schedule.json"))
+        #         self.schedules = []
+        #         for schedule in data["schedules"]:
+        #             self.schedules.append(schedule)
+   
+        #         return json.dumps(self.schedules)
+        
+        if len(params)!=0 and len(uri)!=0:
+            print(len(params))
+            if uri[0] == 'getSchedules':
                 data = json.load(open("schedule.json"))
                 self.schedules = []
                 for schedule in data["schedules"]:
-                    self.schedules.append(schedule)
-   
+                    if schedule["deviceName"] == params["room"]:
+                        self.schedules.append(schedule)
+                print(self.schedules)
                 return json.dumps(self.schedules)
                 
-        
         
         if params=={} and len(uri)!=0:  
             if uri[0] == "getSensorsList":  
