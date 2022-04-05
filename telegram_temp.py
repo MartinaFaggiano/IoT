@@ -34,7 +34,7 @@ class TelegramClass(object):
                     [InlineKeyboardButton(text='Umidity', callback_data='umid')],
                     [InlineKeyboardButton(text='CO', callback_data='co')],
                     [InlineKeyboardButton(text='Schedule', callback_data='sched')],
-                    [InlineKeyboardButton(text='Flame Aanalogo', callback_data='flameA')],
+                    [InlineKeyboardButton(text='Add new device', callback_data='newDevice')],
                     [InlineKeyboardButton(text='Flame Digitale', callback_data='flameD')]
                 ])
 
@@ -75,10 +75,15 @@ class TelegramClass(object):
             self.bot.sendMessage(from_id, text='La Pressione è di: ' + feeds[1]['field3'] + ' mbar')
             
         if query_data == "sched":
-                buttons = [[InlineKeyboardButton(text=f'Roome number 1', callback_data=f'HeatingSystem_1'), 
-                        InlineKeyboardButton(text=f'Room number 2', callback_data=f'HeatingSystem_2')]]
-                keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-                self.bot.sendMessage(from_id, text='Choose a room', reply_markup=keyboard)
+            reqHome = request.urlopen('http://127.0.0.1:8080/getDevicesList')
+            dataHome = reqHome.read().decode('utf-8')
+            lista_device = json.loads(dataHome)
+            buttons = [[]]
+            for dev in lista_device:
+                buttons[0].append(InlineKeyboardButton(text=dev["deviceName"], callback_data=dev["deviceName"])) 
+
+            keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+            self.bot.sendMessage(from_id, text='Choose a room', reply_markup=keyboard)
           
         
         if('HeatingSystem' in query_data):
@@ -92,22 +97,7 @@ class TelegramClass(object):
                 ])
 
             x = self.bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
-            
-
-# non puù necessaria
-        # if(query_data == "HeatingSystem_1"):
-        #         reqHome = request.urlopen('http://127.0.0.1:8080/getSchedulesRoomOne')
-        #         dataHome = reqHome.read().decode('utf-8')
-        #         data_dictHome = json.loads(dataHome)
-        #         print(data_dictHome)
-        #         self.bot.sendMessage(from_id, text="Schedule room one: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
-                
-        # if(query_data == "HeatingSystem_2"):
-        #         reqHome = request.urlopen('http://127.0.0.1:8080/getSchedulesRoomTwo')
-        #         dataHome = reqHome.read().decode('utf-8')
-        #         data_dictHome = json.loads(dataHome)
-        #         self.bot.sendMessage(from_id, text= "You choose room number two")
-                
+                  
               
         if(query_data == 'get_schedule_heating'):
             params = {
@@ -136,51 +126,40 @@ class TelegramClass(object):
             x = self.bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
         
 
+        #modifca fascia oraria in base alla scelta 
+        if('post_schedule_heating' in query_data):
 
-        if(query_data == 'post_schedule_heating_morning'):
+            modifica = query_data.split("_")[3]
+            params = {
+                'mod' : modifica}
+            query_string = urllib.parse.urlencode( params ) 
+            url = 'http://127.0.0.1:8080/getSchedules'
+            url = url + "?" + query_string 
+            reqHome = request.urlopen(url)
+            dataHome = reqHome.read().decode('utf-8')
+            data_dictHome = json.loads(dataHome)
+
 
             json_data = json.dumps( {"schedules": [
             {
-                "deviceName": "HeatingSystem_1",
-                "startHour": "08:00:00",
-                "endHour": "11:00:00"
+                "deviceName": self.deviceName,
+                "startHour": data_dictHome[0][0]['startHour'],
+                "endHour": data_dictHome[0][0]['endHour']
             }]})  
+            params = {
+                'room' : self.deviceName}
+            query_string = urllib.parse.urlencode( params ) 
+            url = 'http://127.0.0.1:8080/postSchedule'
+            url = url + "?" + query_string 
 
-            r = requests.post('http://127.0.0.1:8080/postSchedule', 
-                    data=json_data,
-                )
-        
+            re = requests.post(url, 
+                    data = json_data,
+             )
+
             self.bot.sendMessage(from_id, text= "Schedule modified")
             
             
-        if(query_data == 'post_schedule_heating_afternoon'):
-            reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
-            dataHome = reqHome.read().decode('utf-8')
-            data_dictHome = json.loads(dataHome)
-            self.bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
-            print(data_dictHome[0])
-            
-        if(query_data == 'post_schedule_heating_evening'):
-            reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
-            dataHome = reqHome.read().decode('utf-8')
-            data_dictHome = json.loads(dataHome)
-            self.bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
-            print(data_dictHome[0])
-            
-        if(query_data == 'post_schedule_heating_night'):
-            reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
-            dataHome = reqHome.read().decode('utf-8')
-            data_dictHome = json.loads(dataHome)
-            self.bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
-            print(data_dictHome[0])
-            
-        if(query_data == 'post_schedule_heating_allday'):
-            reqHome = request.urlopen('http://127.0.0.1:8080/schedules')
-            dataHome = reqHome.read().decode('utf-8')
-            data_dictHome = json.loads(dataHome)
-            self.bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
-            print(data_dictHome[0])
-
+ 
         # elif(query_data == 'flameA'):
         #     self.bot.sendMessage(from_id, text='Il sensore di luce misura: ' + feeds[1]['field5'] + ' di un range 0 -1024')
 

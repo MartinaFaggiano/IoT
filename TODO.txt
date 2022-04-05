@@ -40,4 +40,5 @@ TELEGRAM - Device connector
 
 
 DA FINIRE 
-bisogna fare una post per la room 1 poichè ora modifica tutta la lista schedule
+gestire l'aggiunta di un dispositivo: se io aggiungo un dispositivo deve essere aggiunto sia su schedule 
+che su devices. 

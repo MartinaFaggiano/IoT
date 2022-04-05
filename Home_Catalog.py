@@ -18,44 +18,37 @@ class HomeCatalog(object):
     exposed = True
     def GET(self, *uri, **params):
         
-        # if params=={} and len(uri)!=0:
-        #     if uri[0] == 'getSchedulesRoomOne':
-        #         data = json.load(open("schedule.json"))
-        #         self.schedules = []
-        #         for schedule in data["schedules"]:
-        #             self.schedules.append(schedule)
-   
-        #         return json.dumps(self.schedules)
-            
-        # if params== {} and len(uri)!=0:
-        #     if uri[0] == 'getSchedulesRoomTwo':
-        #         data = json.load(open("schedule.json"))
-        #         self.schedules = []
-        #         for schedule in data["schedules"]:
-        #             self.schedules.append(schedule)
-   
-        #         return json.dumps(self.schedules)
-        
+
         if len(params)!=0 and len(uri)!=0:
-            print(len(params))
-            if uri[0] == 'getSchedules':
-                data = json.load(open("schedule.json"))
-                self.schedules = []
-                for schedule in data["schedules"]:
-                    if schedule["deviceName"] == params["room"]:
-                        self.schedules.append(schedule)
-                print(self.schedules)
-                return json.dumps(self.schedules)
+            chiave = list(params.keys())[0]
+            if chiave == "room":
+                if uri[0] == 'getSchedules':
+                    data = json.load(open("schedule.json"))
+                    self.schedules = []
+                    for schedule in data["schedules"]:
+                        if schedule["deviceName"] == params["room"]:
+                            self.schedules.append(schedule)
+                    print(self.schedules)
+                    return json.dumps(self.schedules)
+
+            if chiave == "mod":
+                if uri[0] == 'getSchedules':
+                    data = json.load(open("schedule.json"))
+                    self.schedules = []
+                    self.schedules.append(data["modify_schedules"][0][params["mod"]])
+                    return json.dumps(self.schedules)
+
+
                 
         
         if params=={} and len(uri)!=0:  
-            if uri[0] == "getSensorsList":  
+            if uri[0] == "getDevicesList":  
                 data = json.load(open("devices.json"))
-                self.sensors = []
+                self.devices = []
                 for device in data["devicesList"]:
                     self.devices.append(device) 
                      
-                return json.dumps(self.sensors)
+                return json.dumps(self.devices)
     
             elif uri[0]=="getTopicsList":
                 data = json.load(open("MQTT-topics.json"))
@@ -65,12 +58,12 @@ class HomeCatalog(object):
 
                 return json.dumps(self.topics)
 
-            elif uri[0] == "getDevicesList":   
+            elif uri[0] == "getSensorsList":   
                 data = json.load(open("sensors.json"))
-                self.devices = []
+                self.sensors = []
                 for sensor in data["sensorsList"]:
                     self.sensors.append(sensor)    
-                return json.dumps(self.devices)
+                return json.dumps(self.sensors)
 
             elif uri[0] == "getSchedules":    
                 data = json.load(open("schedule.json"))
@@ -128,6 +121,18 @@ class HomeCatalog(object):
         data = cherrypy.request.body.read()
         data = json.loads(data)
 
+        if len(params)!=0 and len(uri)!=0:
+            if uri[0] == 'postSchedule':
+                data = data["schedules"][0]
+                print("aaaaaa", data)
+                json_file = json.load(open("schedule.json"))
+                for schedule in json_file["schedules"]:
+                    if schedule["deviceName"] == params["room"]:
+                        schedule["startHour"] = data["startHour"]
+                        schedule["endHour"] = data["endHour"]
+                with open("schedule.json", "w") as file:
+                    json.dump(json_file, file)
+
         if params=={} and len(uri)!=0:  
             if uri[0] == "postSensorsList":
                 self.sensors.append(data)
@@ -161,45 +166,7 @@ class HomeCatalog(object):
                 with open("schedule.json", "w") as file:
                     json.dump(json_file, file)       
                     
-            elif uri[0] == "postModify_schedule_morning": 
-                self.schedules.append(data)
-                json_file = json.load(open("schedule.json"))
-                json_file["modify_schedules"]["morning"] = self.schedules
-                print(json_file)
-                with open("schedule.json", "w") as file:
-                    json.dump(json_file, file)  
-                
-            elif uri[0] == "postModify_schedule_afternoon": 
-                self.schedules.append(data)
-                json_file = json.load(open("schedule.json"))
-                json_file["modify_schedules"]["afternoon"] = self.schedules
-                print(json_file)
-                with open("schedule.json", "w") as file:
-                    json.dump(json_file, file)  
-                    
-            elif uri[0] == "postModify_schedule_evening": 
-                self.schedules.append(data)
-                json_file = json.load(open("schedule.json"))
-                json_file["modify_schedules"]["evening"] = self.schedules
-                print(json_file)
-                with open("schedule.json", "w") as file:
-                    json.dump(json_file, file)  
-                    
-            elif uri[0] == "postModify_schedule_night": 
-                self.schedules.append(data)
-                json_file = json.load(open("schedule.json"))
-                json_file["modify_schedules"]["night"] = self.schedules
-                print(json_file)
-                with open("schedule.json", "w") as file:
-                    json.dump(json_file, file)     
-                    
-            elif uri[0] == "postModify_schedule_allday": 
-                self.schedules.append(data)
-                json_file = json.load(open("schedule.json"))
-                json_file["modify_schedules"]["allday"] = self.schedules
-                print(json_file)
-                with open("schedule.json", "w") as file:
-                    json.dump(json_file, file)         
+    
 
 
         # data = cherrypy.request.body.read()

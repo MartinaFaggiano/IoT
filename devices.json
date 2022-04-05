@@ -1,8 +1,16 @@
 {
     "devicesList": [
         {
-            "deviceName": "Rasp1",
+            "deviceName": "HeatingSystem_1",
             "deviceID": "1"
+        },        
+        {
+            "deviceName": "HeatingSystem_2",
+            "deviceID": "2"
+        },
+        {
+            "deviceName": "HeatingSystem_3",
+            "deviceID": "3"
         }
     ]
 }
