@@ -34,8 +34,7 @@ class TelegramClass(object):
                     [InlineKeyboardButton(text='Umidity', callback_data='umid')],
                     [InlineKeyboardButton(text='CO', callback_data='co')],
                     [InlineKeyboardButton(text='Schedule', callback_data='sched')],
-                    [InlineKeyboardButton(text='Add new device', callback_data='newDevice')],
-                    [InlineKeyboardButton(text='Flame Digitale', callback_data='flameD')]
+                    [InlineKeyboardButton(text='Add new device', callback_data='newDevice')]
                 ])
 
         self.bot.sendMessage(chat_id, 'Usa il menu per mostrare i valori dela tua WeatherStation', reply_markup=keyboard)
@@ -86,7 +85,7 @@ class TelegramClass(object):
             self.bot.sendMessage(from_id, text='Choose a room', reply_markup=keyboard)
           
         
-        if('HeatingSystem' in query_data):
+        if('RoomSystem' in query_data):
             
             self.deviceName = query_data 
             
@@ -124,7 +123,7 @@ class TelegramClass(object):
                 ])
 
             x = self.bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
-        
+       
 
         #modifca fascia oraria in base alla scelta 
         if('post_schedule_heating' in query_data):
@@ -158,20 +157,33 @@ class TelegramClass(object):
 
             self.bot.sendMessage(from_id, text= "Schedule modified")
             
+
+        if query_data == "newDevice":
+            reqHome = request.urlopen('http://127.0.0.1:8080/getDevicesList')
+            dataHome = reqHome.read().decode('utf-8')
+            devices = json.loads(dataHome)
+        
+            dev = str(len(devices)+1)
+            devices.append({
+            "deviceName": "RoomSystem_" + dev,
+            "device": []
+            })
+
+
+            json_data = json.dumps( devices)
+
+            url = 'http://127.0.0.1:8080/postAddDevice'
+
+            re = requests.post(url, 
+                    data = json_data,
+            )
+
+            self.bot.sendMessage(from_id, text='Device n ' + dev + " successfully added")
             
  
-        # elif(query_data == 'flameA'):
-        #     self.bot.sendMessage(from_id, text='Il sensore di luce misura: ' + feeds[1]['field5'] + ' di un range 0 -1024')
+      
 
-        # elif(query_data == 'flameD'):
 
-        #     if(feeds[1]['field6'] == '0'):
-        #         self.bot.sendMessage(from_id, text="Non c'è fiamma in casa")
-        
-        #     elif(feeds[1]['field6'] == '1'):
-        #         self.bot.sendMessage(from_id, text="ATTENZIONE C'è PRESENZA DI FIAMMA IN CASA!")    
-
-    #AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
     # funzione che serve per impostare quale stanza usare
 
     #  def on_chat_message(self, msg):

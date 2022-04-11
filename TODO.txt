@@ -37,8 +37,5 @@ TELEGRAM - Device connector
 
 
 
-
-
 DA FINIRE 
-gestire l'aggiunta di un dispositivo: se io aggiungo un dispositivo deve essere aggiunto sia su schedule 
-che su devices. 
+da iniziare time shift o comunque post process
