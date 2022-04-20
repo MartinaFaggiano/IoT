@@ -38,4 +38,8 @@ TELEGRAM - Device connector
 
 
 DA FINIRE 
-da iniziare time shift o comunque post process
+
+per quanto riguarda environmental comfort dall home catalog prendere info 
+sulle stanze e chiedere poi a thinkspeak solo i dati relativi alla stanza richiesta 
+
+da capire la creazione di canali su thinkspeak

@@ -34,7 +34,9 @@ class TelegramClass(object):
                     [InlineKeyboardButton(text='Umidity', callback_data='umid')],
                     [InlineKeyboardButton(text='CO', callback_data='co')],
                     [InlineKeyboardButton(text='Schedule', callback_data='sched')],
-                    [InlineKeyboardButton(text='Add new device', callback_data='newDevice')]
+                    [InlineKeyboardButton(text='Add new device', callback_data='newDevice')],
+                    [InlineKeyboardButton(text='Comfort', callback_data='getComfort')]
+
                 ])
 
         self.bot.sendMessage(chat_id, 'Usa il menu per mostrare i valori dela tua WeatherStation', reply_markup=keyboard)
@@ -179,6 +181,15 @@ class TelegramClass(object):
             )
 
             self.bot.sendMessage(from_id, text='Device n ' + dev + " successfully added")
+            
+            
+        if query_data == "getComfort":
+            reqHome = request.urlopen('http://127.0.0.1:8070/getComfort')
+            dataHome = reqHome.read().decode('utf-8')
+            self.bot.sendMessage(from_id, text = dataHome)
+
+            
+            
             
  
       
