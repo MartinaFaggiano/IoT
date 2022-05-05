@@ -40,8 +40,14 @@ class HomeCatalog(object):
                 self.devices = []
                 for device in data["devicesList"]:
                     self.devices.append(device) 
-                     
                 return json.dumps(self.devices)
+
+            if uri[0] == "getDevicesFile":  
+                filename = {
+                    "filename": "devices.json"
+                    }
+                return json.dumps(filename)
+
     
             elif uri[0]=="getTopicsList":
                 data = json.load(open("MQTT-topics.json"))

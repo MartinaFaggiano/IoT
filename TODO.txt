@@ -29,6 +29,10 @@ prende info sulle schedule dall'home CATALOG
 agisce sull'accendi e spegni: publisher sul devide connector
 riceve misurazioni: subscriber 
 
+ENV Comfort
+ci sono delle parti commentate, de-commentarle quando aggiungi sensori alla rasp per raccolta dati, 
+al momento da errore per NoneType
+
 
 Consulenza 
 TELEGRAM - Device connector
@@ -38,8 +42,8 @@ TELEGRAM - Device connector
 
 
 DA FINIRE 
+Iniziate System health 
 
-per quanto riguarda environmental comfort dall home catalog prendere info 
-sulle stanze e chiedere poi a thinkspeak solo i dati relativi alla stanza richiesta 
 
-da capire la creazione di canali su thinkspeak
+da capire la creazione di canali su thinkspeak: si possono creare canala tramite richieste POST, 
+se vogliamo implementare seguire ----> https://it.mathworks.com/help/thingspeak/createchannel.html

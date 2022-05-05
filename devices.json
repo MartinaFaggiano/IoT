@@ -21,7 +21,8 @@
                     "deviceID": "1",
                     "unit": "%"
                 }
-            ]
+            ],
+            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=2"
         },
         {
             "deviceName": "RoomSystem_2",
@@ -44,7 +45,8 @@
                     "deviceID": "2",
                     "unit": "%"
                 }
-            ]
+            ],
+            "channel": ""
         },
         {
             "deviceName": "RoomSystem_3",
@@ -67,7 +69,8 @@
                     "deviceID": "3",
                     "unit": "%"
                 }
-            ]
+            ],
+            "channel": ""
         },
         {
             "deviceName": "RoomSystem_4",
@@ -90,7 +93,8 @@
                     "deviceID": "4",
                     "unit": "%"
                 }
-            ]
+            ],
+            "channel": ""
         }
     ]
 }

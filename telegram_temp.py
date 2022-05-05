@@ -75,7 +75,8 @@ class TelegramClass(object):
         elif(query_data == 'co'):
             self.bot.sendMessage(from_id, text='La Pressione è di: ' + feeds[1]['field3'] + ' mbar')
             
-        if query_data == "sched":
+        if query_data == "sched" or query_data == "getComfort":
+            self.utility = query_data
             reqHome = request.urlopen('http://127.0.0.1:8080/getDevicesList')
             dataHome = reqHome.read().decode('utf-8')
             lista_device = json.loads(dataHome)
@@ -88,16 +89,29 @@ class TelegramClass(object):
           
         
         if('RoomSystem' in query_data):
-            
             self.deviceName = query_data 
-            
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                    # [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data= deviceName)],
-                    [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data= 'get_schedule_heating')],
-                    [InlineKeyboardButton(text='Modifica orario', callback_data='post_schedule_heating')]
-                ])
+            if self.utility == "sched": 
+                
+                keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                        # [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data= deviceName)],
+                        [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data= 'get_schedule_heating')],
+                        [InlineKeyboardButton(text='Modifica orario', callback_data='post_schedule_heating')]
+                    ])
 
-            x = self.bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
+                x = self.bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
+            elif self.utility == "getComfort":
+                params = {
+                    'room' : self.deviceName}
+                query_string = urllib.parse.urlencode( params ) 
+                url = 'http://127.0.0.1:8070/getComfort'
+                url = url + "?" + query_string 
+
+                reqHome = request.urlopen(url)
+                dataHome = reqHome.read().decode('utf-8')
+                # data_dictHome = json.loads(dataHome)
+
+                self.bot.sendMessage(from_id, text = dataHome)
+
                   
               
         if(query_data == 'get_schedule_heating'):
@@ -182,11 +196,7 @@ class TelegramClass(object):
 
             self.bot.sendMessage(from_id, text='Device n ' + dev + " successfully added")
             
-            
-        if query_data == "getComfort":
-            reqHome = request.urlopen('http://127.0.0.1:8070/getComfort')
-            dataHome = reqHome.read().decode('utf-8')
-            self.bot.sendMessage(from_id, text = dataHome)
+
 
             
             

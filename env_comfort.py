@@ -1,7 +1,9 @@
 from email import feedparser
+from fileinput import filename
 import urllib
 from urllib import request
 import json
+from urllib.parse import urljoin
 import cherrypy
 
 
@@ -12,39 +14,32 @@ class environmental():
     #classe per richiamare thinkspeak
     
     def __init__(self) :
-          self.threshold = str(23.5)
+          self.threshold = str(20)
 
-    def call_thinkspeak(self):
-        response = request.urlopen('https://api.thingspeak.com/channels/1669938/feeds.json?api_key=4D9OPXEJK7T63SVN&results=2')
+    def call_thinkspeak(self, room):
+
+        reqHome = request.urlopen('http://127.0.0.1:8080/getDevicesFile')
+        dataHome = reqHome.read().decode('utf-8')
+        filename_ = json.loads(dataHome)
+        data = json.load(open(filename_["filename"]))
+
+        for dev in data["devicesList"]:
+            if dev["deviceName"] == room:
+                urlJson = dev["channel"]
+
+        response = request.urlopen(urlJson)
 
         # preleva i dati json dalla richiesta
-
         data = response.read().decode('utf-8')
 
         # convertiamo la stringa in dizionario
-
         data_dict = json.loads(data)
 
         #separiamo i valori che ci interessano
-
         feeds = data_dict['feeds']
         
         return feeds
 
-        #facciamo reagire alla pressione del pulsante
-        
-
-        # if(query_data == 'temp'):
-        #     self.bot.sendMessage(from_id, text='La Temperatura è di: ' + feeds[1]['field1'] + '°C')
-            
-        # elif(query_data == 'umid'):
-        #     self.bot.sendMessage(from_id, text="L'Umidità è il: " + feeds[1]['field2'] + '%')
-            
-        # elif(query_data == 'co'):
-        #     self.bot.sendMessage(from_id, text='La Pressione è di: ' + feeds[1]['field3'] + ' mbar')
-            
-        #print(feeds) #printa le ultime due temperature misurate
-        
     # def POST(self, *uri, **params):
     
     #     data = cherrypy.request.body.read()
@@ -61,33 +56,36 @@ class environmental():
     #             with open("schedule.json", "w") as file:
     #                 json.dump(json_file, file)
     
-    
-    
-
     exposed = True
     def GET(self, *uri, **params):
         
-        if len(params)==0 and len(uri)!=0:
-            
-            if uri[0] == 'getComfort':
-                
-                feeds = self.call_thinkspeak() 
-
-            
-                if feeds[1]['field1'] == self.threshold:
-                
-                    return 'Temperatura ottimale'
-                if feeds[1]['field1'] <  self.threshold:
+        if len(params)!=0 and len(uri)!=0:
+            chiave = list(params.keys())[0]
+            if chiave == "room":
+                if uri[0] == 'getComfort':
                     
-                    return 'La temperatura è di '+ feeds[1]['field1'] + '\n si consiglia di accendere il riscaldamento'
-                
-                if feeds[1]['field1'] > self.threshold:
+                    feeds = self.call_thinkspeak(params["room"]) 
+                    temp =  float(feeds[1]['field1'])
+                    # hum =  float(feeds[1]['field2'])
+                    # co =  float(feeds[1]['field3'])
+
+                    if temp > 20:
+                        return "VALORE OTTIMALE"
+
+                    # if temp > self.threshold and temp < 23:
+                    #     if hum < 60 and hum > 20: 
+                    #         return "Temperature:"+ temp + '\n"Humidity:'+ hum + '\nOttimal comfort'
+                    #     else:
+                    #         return "Temperature:"+ temp + '\n"Humidity:'+ hum + '\nHumidity level too high'
+
+                    # elif temp < self.threshold and temp > 18:
+                    #     if hum > 60 : 
+                    #         return "Temperature:"+ temp + '\n"Humidity:'+ hum + '\nOttimal comfort'
+                    #     else:
+                    #         return "Temperature:"+ temp + '\n"Humidity:'+ hum + '\nHumidity level too low'
                     
-                    return "La temperatura è di "+ feeds[1]['field1'] + '\n si consiglia di spegnere il riscaldamento'
-                
-            
-
-
+                    # if co > 33:
+                    #     return "Co level:"+ temp + "\nLevel is too hight, OPEN THE WINDOWS!"  
         
   
 if __name__=="__main__":
