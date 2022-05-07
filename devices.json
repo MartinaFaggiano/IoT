@@ -22,7 +22,7 @@
                     "unit": "%"
                 }
             ],
-            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=2"
+            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=10"
         },
         {
             "deviceName": "RoomSystem_2",
@@ -46,7 +46,7 @@
                     "unit": "%"
                 }
             ],
-            "channel": ""
+            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=10"
         },
         {
             "deviceName": "RoomSystem_3",
@@ -70,7 +70,7 @@
                     "unit": "%"
                 }
             ],
-            "channel": ""
+            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=10"
         },
         {
             "deviceName": "RoomSystem_4",
@@ -94,7 +94,7 @@
                     "unit": "%"
                 }
             ],
-            "channel": ""
+            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=10"
         }
     ]
 }

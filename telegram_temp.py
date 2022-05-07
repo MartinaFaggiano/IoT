@@ -35,8 +35,8 @@ class TelegramClass(object):
                     [InlineKeyboardButton(text='CO', callback_data='co')],
                     [InlineKeyboardButton(text='Schedule', callback_data='sched')],
                     [InlineKeyboardButton(text='Add new device', callback_data='newDevice')],
-                    [InlineKeyboardButton(text='Comfort', callback_data='getComfort')]
-
+                    [InlineKeyboardButton(text='Comfort', callback_data='getComfort')],
+                    [InlineKeyboardButton(text='Control System Health', callback_data='getHealth')]
                 ])
 
         self.bot.sendMessage(chat_id, 'Usa il menu per mostrare i valori dela tua WeatherStation', reply_markup=keyboard)
@@ -157,7 +157,7 @@ class TelegramClass(object):
 
             json_data = json.dumps( {"schedules": [
             {
-                "deviceName": self.deviceName,
+                "deviceName": self.deviceName,#TODO inserire soglia temp
                 "startHour": data_dictHome[0][0]['startHour'],
                 "endHour": data_dictHome[0][0]['endHour']
             }]})  
@@ -196,6 +196,16 @@ class TelegramClass(object):
 
             self.bot.sendMessage(from_id, text='Device n ' + dev + " successfully added")
             
+        if('getHealth' in query_data):
+
+            url = 'http://127.0.0.1:8050/getHealth'
+
+            reqHome = request.urlopen(url)
+            dataHome = reqHome.read().decode('utf-8')
+            data_dictHome = json.loads(dataHome)
+            for i, room in enumerate(data_dictHome):
+                room = json.dumps(room)
+                self.bot.sendMessage(from_id, text = room)
 
 
             

@@ -14,7 +14,7 @@ class environmental():
     #classe per richiamare thinkspeak
     
     def __init__(self) :
-          self.threshold = str(20)
+          self.threshold = str(20) #TODO prednere soglia specifica della stanza
 
     def call_thinkspeak(self, room):
 
@@ -72,7 +72,7 @@ class environmental():
                     if temp > 20:
                         return "VALORE OTTIMALE"
 
-                    # if temp > self.threshold and temp < 23:
+                    # if temp > self.threshold and temp < 23: #TODO 
                     #     if hum < 60 and hum > 20: 
                     #         return "Temperature:"+ temp + '\n"Humidity:'+ hum + '\nOttimal comfort'
                     #     else:

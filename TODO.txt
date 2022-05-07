@@ -42,7 +42,9 @@ TELEGRAM - Device connector
 
 
 DA FINIRE 
-Iniziate System health 
+sistemare aggiunta canali da home catalog
+gestione soglia temperatura, iserire nelle schedule.json? 
+
 
 
 da capire la creazione di canali su thinkspeak: si possono creare canala tramite richieste POST, 
