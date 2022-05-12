@@ -12,17 +12,14 @@ Remember to always use SenML as data format:
 }
 
 
-
 accendi spegni sistema di riscaldamento --> devo prima montare led o relè 
 post process? 
 
 TELEGRAM - HOME CATALOG 
 time shift: l'utente ha la possibilità di mandare le schedule del riscaldamento al HOME CATALOG -- creazione topic 
 
-SYSTEM HEALTH 
+SYSTEM HEALTH  - FINITO
 controlla eventuali manlfunzionamenti del sistema
-
-Environmental comfort​: comfort dell'utente
 
 TIME SHIFT
 prende info sulle schedule dall'home CATALOG
@@ -41,10 +38,9 @@ TELEGRAM - Device connector
 
 
 
+
 DA FINIRE 
-sistemare aggiunta canali da home catalog
-
-
+time shift, manda la soglia richiesta per la stanza alla rasp tramite mqtt 
 
 da capire la creazione di canali su thinkspeak: si possono creare canala tramite richieste POST, 
 se vogliamo implementare seguire ----> https://it.mathworks.com/help/thingspeak/createchannel.html
