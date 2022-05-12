@@ -57,26 +57,38 @@ class health():
                 })
         
         return temp
+    
 
   
     exposed = True
     def GET(self, *uri, **params):
         
+        reqHome = request.urlopen('http://127.0.0.1:8080/getThreshold')
+        dataHome = reqHome.read().decode('utf-8')
+        lista_threshold = json.loads(dataHome)
+        
+    
+        
+        
         if len(params)==0 and len(uri)!=0:
             if uri[0] == 'getHealth':
                 if self.on_:  
                     rooms = self.call_thinkspeak() 
-                    for i, room in enumerate(rooms):
-                        if int(room["meanTemperature"]) < self.threshold:
-                            room["status"]= "Error" 
-                        else:
-                            room["status"]= "Ok" 
+                    for i, room in enumerate(rooms): #cicla sulle room di teamspeak
+                        for j, rth in enumerate(lista_threshold):  #cicla sulle schedule 
+                            if room["deviceName"] == rth["deviceName"]:
+                                if int(room["meanTemperature"]) < self.threshold:
+                                    room["status"]= "Error" 
+                                else:
+                                    room["status"]= "Ok" 
                     return json.dumps(rooms)
                 else:
                     rooms = self.call_thinkspeak() 
                     for i, room in enumerate(rooms):
                         room["status"]= "OFF" 
                     return json.dumps(rooms)
+        
+                
 
     
   

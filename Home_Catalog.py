@@ -33,7 +33,6 @@ class HomeCatalog(object):
                                 "th_sup" : schedule["th_sup"]
                             }
 
-                    print(th)
                     return json.dumps(th)
 
 
@@ -77,6 +76,19 @@ class HomeCatalog(object):
                     self.schedules.append(schedule)
    
                 return json.dumps(self.schedules)
+            
+            elif uri[0] == 'getThreshold':
+                data = json.load(open("schedule.json"))
+                self.schedules = []
+                for schedule in data["schedules"]:
+                    
+                        th = {
+                            "deviceName": schedule["deviceName"],
+                            "th_inf" : schedule["th_inf"],
+                            "th_sup" : schedule["th_sup"]
+                        }
+
+                return json.dumps(th)
             
 
     def POST(self, *uri, **params):
