@@ -14,7 +14,7 @@ class environmental():
     #classe per richiamare thinkspeak
     
     def __init__(self) :
-          self.threshold = str(20) #TODO prednere soglia specifica della stanza
+          self.threshold = str(20) 
 
     def call_thinkspeak(self, room):
 
@@ -58,6 +58,10 @@ class environmental():
     
     exposed = True
     def GET(self, *uri, **params):
+
+        reqHome = request.urlopen('http://127.0.0.1:8080/getThreshold')
+        dataHome = reqHome.read().decode('utf-8')
+        lista_threshold = json.loads(dataHome)
         
         if len(params)!=0 and len(uri)!=0:
             chiave = list(params.keys())[0]

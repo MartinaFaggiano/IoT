@@ -5,7 +5,7 @@
             "startHour": "08:00:00",
             "endHour": "10:00:00",
             "th_inf": "14",
-            "th_sup": "65"
+            "th_sup": "25"
         }
     ],
     "modify_schedules": [

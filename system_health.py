@@ -14,8 +14,7 @@ class health():
     #classe per richiamare thinkspeak
     
     def __init__(self) :
-        self.threshold = 20 ##TODO prendere soglia aggiornata da Home Catalog per stanza 
-        self.on_ = False #TODO recuperare status vero
+        self.on_ = True #TODO recuperare status vero
 
     def evaluateMean(self, feeds):
         tempMedia = 0.0
@@ -67,9 +66,6 @@ class health():
         dataHome = reqHome.read().decode('utf-8')
         lista_threshold = json.loads(dataHome)
         
-    
-        
-        
         if len(params)==0 and len(uri)!=0:
             if uri[0] == 'getHealth':
                 if self.on_:  
@@ -77,8 +73,9 @@ class health():
                     for i, room in enumerate(rooms): #cicla sulle room di teamspeak
                         for j, rth in enumerate(lista_threshold):  #cicla sulle schedule 
                             if room["deviceName"] == rth["deviceName"]:
-                                if int(room["meanTemperature"]) < self.threshold:
-                                    room["status"]= "Error" 
+
+                                if int(room["meanTemperature"]) < int(rth["th_sup"]):
+                                    room["status"]= "Check the system" 
                                 else:
                                     room["status"]= "Ok" 
                     return json.dumps(rooms)

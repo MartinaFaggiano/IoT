@@ -79,16 +79,16 @@ class HomeCatalog(object):
             
             elif uri[0] == 'getThreshold':
                 data = json.load(open("schedule.json"))
-                self.schedules = []
+                self.ths = []
                 for schedule in data["schedules"]:
-                    
                         th = {
                             "deviceName": schedule["deviceName"],
                             "th_inf" : schedule["th_inf"],
                             "th_sup" : schedule["th_sup"]
                         }
+                        self.ths.append(th)
 
-                return json.dumps(th)
+                return json.dumps(self.ths)
             
 
     def POST(self, *uri, **params):
@@ -131,29 +131,38 @@ class HomeCatalog(object):
             elif uri[0] == "postAddDevice": 
                 nDev = len(data)
 
-                data[nDev-1]["device"] = [{
-                    "sensorName": "Temp",
-                    "measureType": "temp",
-                    "deviceID": str(nDev),
-                    "unit": "C"
-                },
-                {
-                    "sensorName": "Humidity",
-                    "measureType": "hum",
-                    "deviceID": str(nDev),
-                    "unit": "%"
-                },
-                {
-                    "sensorName": "CO2",
-                    "measureType": "level",
-                    "deviceID": str(nDev),
-                    "unit": "%"
-                }]
-                json_file = json.load(open("devices.json"))
-                json_file["devicesList"] = data
-                print(json_file)
-                with open("devices.json", "w") as file:
-                    json.dump(json_file, file)
+                if nDev > 3:
+                    return "unsuccessfully added"
+                else:
+                    data[nDev-1]["device"] = [{
+                        "sensorName": "Temp",
+                        "measureType": "temp",
+                        "deviceID": str(nDev),
+                        "unit": "C"
+                    },
+                    {
+                        "sensorName": "Humidity",
+                        "measureType": "hum",
+                        "deviceID": str(nDev),
+                        "unit": "%"
+                    },
+                    {
+                        "sensorName": "CO2",
+                        "measureType": "level",
+                        "deviceID": str(nDev),
+                        "unit": "%"
+                    }]
+                    channels = json.load(open("channels.json"))
+                    ch = channels["channel"][0][str(nDev)]
+                    print("CHANN___", ch)
+                    data[nDev-1]["channel"] = ch
+
+                    json_file = json.load(open("devices.json"))
+                    json_file["devicesList"] = data
+                    print(json_file)
+                    with open("devices.json", "w") as file:
+                        json.dump(json_file, file)
+                    return "successfully added"
 
         
 

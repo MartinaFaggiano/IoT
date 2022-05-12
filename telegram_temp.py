@@ -246,22 +246,28 @@ class TelegramClass(object):
             devices = json.loads(dataHome)
         
             dev = str(len(devices)+1)
-            devices.append({
-            "deviceName": "RoomSystem_" + dev,
-            "device": []
-            })
+            if int(dev) <= 3:  
+                devices.append({
+                "deviceName": "RoomSystem_" + dev,
+                "device": []
+                })
 
 
-            json_data = json.dumps( devices)
+                json_data = json.dumps( devices)
 
-            url = 'http://127.0.0.1:8080/postAddDevice'
+                url = 'http://127.0.0.1:8080/postAddDevice'
 
-            re = requests.post(url, 
-                    data = json_data,
-            )
+                re = requests.post(url, 
+                        data = json_data,
+                )
 
-            self.bot.sendMessage(from_id, text='Device n ' + dev + " successfully added")
-            
+                self.bot.sendMessage(from_id, text='Device n ' + dev + " successfully added")
+            else: 
+                self.bot.sendMessage(from_id, text="Out of channels")
+
+
+
+
         if('getHealth' in query_data):
 
             url = 'http://127.0.0.1:8050/getHealth'

@@ -1,0 +1,10 @@
+{
+    "channel": [
+        {
+            "1": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=10",
+            "2": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=2",
+            "3": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=3"
+
+        }
+    ]
+}
