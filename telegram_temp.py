@@ -1,8 +1,10 @@
 from cgi import parse_header
+# from curses.panel import bottom_panel
 import json
 import logging
 import sys
 import time
+from turtle import update
 from unicodedata import name
 from matplotlib.font_manager import json_dump
 import telepot
@@ -10,8 +12,8 @@ import urllib
 from urllib import request
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
-import Home_Catalog as hc
-
+# from telegram import Update
+# from telegram.ext import Updater, CommandHandler, CallbackContext
 import requests
 
 class TelegramClass(object):
@@ -19,7 +21,12 @@ class TelegramClass(object):
     def __init__(self,tokenBot):
         self.deviceName = ""
         self.tokenBot = tokenBot
+        self.chatIDs = []
         self.bot = telepot.Bot(self.tokenBot)
+        self.th_inf = "m"
+        self.th_sup = "n"
+        self.next = ""
+
 
         MessageLoop(self.bot, {'chat': self.on_chat_message,
                 'callback_query': self.on_callback_query}).run_as_thread()
@@ -29,17 +36,50 @@ class TelegramClass(object):
     def on_chat_message(self, msg):
         content_type, chat_type, chat_id = telepot.glance(msg)
 
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text='Temperature', callback_data='temp')],
-                    [InlineKeyboardButton(text='Umidity', callback_data='umid')],
-                    [InlineKeyboardButton(text='CO', callback_data='co')],
-                    [InlineKeyboardButton(text='Schedule', callback_data='sched')],
-                    [InlineKeyboardButton(text='Add new device', callback_data='newDevice')],
-                    [InlineKeyboardButton(text='Comfort', callback_data='getComfort')],
-                    [InlineKeyboardButton(text='Control System Health', callback_data='getHealth')]
-                ])
+        if chat_id not in self.chatIDs:
+            self.chatIDs.append(chat_id)
+        message = msg['text']
+        if message == "ciao":
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Temperature', callback_data='temp')],
+                [InlineKeyboardButton(text='Umidity', callback_data='umid')],
+                [InlineKeyboardButton(text='Threshold', callback_data='threshold')],
+                [InlineKeyboardButton(text='Schedule', callback_data='sched')],
+                [InlineKeyboardButton(text='Add new device', callback_data='newDevice')],
+                [InlineKeyboardButton(text='Comfort', callback_data='getComfort')],
+                [InlineKeyboardButton(text='Control System Health', callback_data='getHealth')]
+            ])
 
-        self.bot.sendMessage(chat_id, 'Usa il menu per mostrare i valori dela tua WeatherStation', reply_markup=keyboard)
+            self.bot.sendMessage(chat_id, 'Usa il menu per mostrare i valori dela tua WeatherStation', reply_markup=keyboard)
+
+        elif message.split(" ")[0].isnumeric():
+            self.th_inf = message.split(" ")[0]
+            self.th_sup = message.split(" ")[1]
+            if('modThreshold' in self.next):
+
+                # self.bot.update.message.reply_text('What do you want to name this dog?')
+
+                json_data = json.dumps( {"schedules": [
+                {
+                    "deviceName": self.deviceName,#TODO inserire soglia temp
+                    "th_inf": self.th_inf,
+                    "th_sup": self.th_sup
+                }]})  
+                params = {
+                    'room' : self.deviceName}
+                query_string = urllib.parse.urlencode( params ) 
+                url = 'http://127.0.0.1:8080/postThreshold'
+                url = url + "?" + query_string 
+
+                re = requests.post(url, 
+                        data = json_data,
+                )
+
+                self.th_inf = "m"
+                self.th_sup = "n"
+
+                self.bot.sendMessage(chat_id, text= "Thresholds modified")
+
 
     #la funzione on_callback_query processa i dati da Thingspeak e reagisce a seconda del pulsante premuto
         
@@ -75,7 +115,7 @@ class TelegramClass(object):
         elif(query_data == 'co'):
             self.bot.sendMessage(from_id, text='La Pressione è di: ' + feeds[1]['field3'] + ' mbar')
             
-        if query_data == "sched" or query_data == "getComfort":
+        if query_data == "sched" or query_data == "getComfort" or query_data == "threshold":
             self.utility = query_data
             reqHome = request.urlopen('http://127.0.0.1:8080/getDevicesList')
             dataHome = reqHome.read().decode('utf-8')
@@ -112,6 +152,32 @@ class TelegramClass(object):
 
                 self.bot.sendMessage(from_id, text = dataHome)
 
+            elif self.utility == "threshold":
+                params = {
+                    'room' : self.deviceName}
+                query_string = urllib.parse.urlencode( params ) 
+                url = 'http://127.0.0.1:8080/getThreshold'
+                url = url + "?" + query_string 
+
+                reqHome = request.urlopen(url)
+                dataHome = reqHome.read().decode('utf-8')
+                # data_dictHome = json.loads(dataHome)
+
+                self.bot.sendMessage(from_id, text = dataHome)
+
+                keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                        # [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data= deviceName)],
+                        [InlineKeyboardButton(text='Modify thresholds heating system', callback_data= 'modThresholdMess')],
+                        [InlineKeyboardButton(text='Exit', callback_data='exit')] # TODO
+                    ])
+                
+                x = self.bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
+                
+
+        if('modThresholdMess' in query_data):
+
+            self.bot.sendMessage(from_id, text= "Insert threshold separated by a white space. Like '15 21':")
+            self.next = "modThreshold"
                   
               
         if(query_data == 'get_schedule_heating'):
@@ -208,52 +274,6 @@ class TelegramClass(object):
                 self.bot.sendMessage(from_id, text = room)
 
 
-            
-            
-            
- 
-      
-
-
-    # funzione che serve per impostare quale stanza usare
-
-    #  def on_chat_message(self, msg):
-    #         content_type, chat_type, chat_ID = telepot.glance(msg)
-    #         message = msg['text']
-    #         if message == "/switchon":
-    #             payload = self.__message.copy()
-    #             payload['e'][0]['v'] = "on"
-    #             payload['e'][0]['t'] = time.time()
-    #             self.client.myPublish(self.topic, payload)
-    #             self.self.bot.sendMessage(chat_ID, text="Led switched on")   #if I write on telegram /switchOn the bot reply to me with 'on'
-    #         elif message == "/switchOff":
-    #             payload = self.__message.copy()
-    #             payload['e'][0]['v'] = "off"
-    #             payload['e'][0]['t'] = time.time()
-    #             self.client.myPublish(self.topic, payload)
-    #             self.self.bot.sendMessage(chat_ID, text="Led switched off")   #if I write on telegram /switchOff the bot reply to me with 'off'
-    #         elif message == "/sayHello":
-    #             self.self.bot.sendMessage(chat_ID, text="Hello")
-    #         else:
-    #             self.self.bot.sendMessage(chat_ID, text="Command not supported")
-
-
-    # def on_chat_message(self, msg):
-    #         content_type, chat_type, chat_ID = telepot.glance(msg)
-    #         message = msg['text']
-            
-
-    # def on_callback_query(self,msg):
-    #         query_ID , chat_ID , query_data = telepot.glance(msg,flavor='callback_query')
-
-            
-    #         payload = self.__message.copy()
-    #         payload['e'][0]['v'] = query_data
-    #         payload['e'][0]['t'] = time.time()
-    #         self.client.myPublish(self.topic, payload)
-    #         self.self.bot.sendMessage(chat_ID, text=f"Led switched {query_data}")
-    
-        
 
 if __name__== "__main__":
 

@@ -23,6 +23,19 @@ class HomeCatalog(object):
                             self.schedules.append(schedule)
                     print(self.schedules)
                     return json.dumps(self.schedules)
+                if uri[0] == 'getThreshold':
+                    data = json.load(open("schedule.json"))
+                    self.schedules = []
+                    for schedule in data["schedules"]:
+                        if schedule["deviceName"] == params["room"]:
+                            th = {
+                                "th_inf" : schedule["th_inf"],
+                                "th_sup" : schedule["th_sup"]
+                            }
+
+                    print(th)
+                    return json.dumps(th)
+
 
             if chiave == "mod":
                 if uri[0] == 'getSchedules':
@@ -81,6 +94,17 @@ class HomeCatalog(object):
                         schedule["endHour"] = data["endHour"]
                 with open("schedule.json", "w") as file:
                     json.dump(json_file, file)
+
+        if uri[0] == 'postThreshold':
+                data = data["schedules"][0]
+                json_file = json.load(open("schedule.json"))
+                for schedule in json_file["schedules"]:
+                    if schedule["deviceName"] == params["room"]:
+                        schedule["th_inf"] = data["th_inf"]
+                        schedule["th_sup"] = data["th_sup"]
+                with open("schedule.json", "w") as file:
+                    json.dump(json_file, file)
+
 
         if params=={} and len(uri)!=0:  
 

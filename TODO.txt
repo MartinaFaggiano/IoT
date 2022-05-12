@@ -43,7 +43,7 @@ TELEGRAM - Device connector
 
 DA FINIRE 
 sistemare aggiunta canali da home catalog
-gestione soglia temperatura, iserire nelle schedule.json? 
+gestione soglia temperatura per env comf e system health 
 
 
 
