@@ -1,6 +1,6 @@
 {
-	"Topics": [{
-		"Schedule": [{
+	"topics": [{
+		"schedule": [{
 			"heating": "iot/heating_sistem/room1"
 		}]
 	}]
