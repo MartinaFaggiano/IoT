@@ -48,35 +48,29 @@ if __name__ == "__main__":
     # mon = Monitor(broker, "87932489743298432980", port)
     # mon.start()
     # mon.mqtt.subscribe(topic)
+    flag = True
+    starTime = time.mktime(time.localtime()) 
 
-    starTime = time.time()
-    reqHome = request.urlopen('http://127.0.0.1:8080/getSchedules')
-    dataHome = reqHome.read().decode('utf-8')
-    schedules = json.loads(dataHome)
-    
-    startHour = schedules[0]["startHour"]
-    endHour = schedules[0]["endHour"]
     while (1):
         
-        actualTime = time.time()
+        actualTime = time.mktime(time.localtime())
         convert = time.strftime("%H:%M:%S", time.gmtime(actualTime)) #convert actual time in hours
-        if actualTime - starTime > 600: #controllo ogni 10 minuti
+
+        if (actualTime - starTime > 600) or flag: #controllo ogni 10 minuti
+            flag = False
             starTime = actualTime
             reqHome = request.urlopen('http://127.0.0.1:8080/getSchedules') #TODO bisogna espanderlo per tutte le device 
             dataHome = reqHome.read().decode('utf-8')
-            schedules = json.loads(dataHome)            
-            startHour = schedules[0]["startHour"]
-            endHour = schedules[0]["endHour"]
-                    
-     
-        if convert >= startHour:
-            print("on")
-        if convert >= endHour:
-            print("off")
+            schedules = json.loads(dataHome)
+            for sched in schedules:         
+                startHour = sched["startHour"]
+                endHour = sched["endHour"]
+                #TODO con mqtt manda per ogni stanza
+                if convert >= startHour and convert <= endHour:
+                    print(sched["deviceName"], "   on")
+                else :
+                    print(sched["deviceName"], "   off")
             
-    print(dataHome)
-    
-    
     
     
     # while (1):

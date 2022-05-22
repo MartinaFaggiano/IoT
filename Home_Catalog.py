@@ -128,7 +128,7 @@ class HomeCatalog(object):
                 with open("topics.json", "w") as file:
                     json.dump(json_file, file)
 
-            elif uri[0] == "postAddDevice": 
+            elif uri[0] == "postAddDevice":  #crea nuovo dispositivo, e aggiunge schedule di default
                 nDev = len(data)
 
                 if nDev > 3:
@@ -162,6 +162,18 @@ class HomeCatalog(object):
                     print(json_file)
                     with open("devices.json", "w") as file:
                         json.dump(json_file, file)
+
+                    sched = {"deviceName": data[nDev-1]["deviceName"],
+                    "startHour":"08:00:00",
+                    "endHour":"10:00:00",
+                    "th_inf":"18",
+                    "th_sup":"21"}
+                    json_file = json.load(open("schedule.json"))
+                    json_file["schedules"].append(sched)
+                    print("AAAAAAAAAAAAAAA",json_file)
+                    with open("schedule.json", "w") as file:
+                        json.dump(json_file, file) #carica il file, aggiornando solo la lista schedules
+    
                     return "successfully added"
 
         
