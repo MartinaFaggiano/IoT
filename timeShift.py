@@ -1,3 +1,6 @@
+import re
+
+import urllib
 from MyMQTT import MQTT
 import json 
 import time
@@ -5,10 +8,11 @@ import requests
 from urllib import request
 import os 
 
-class Monitor():
+class TimeShiftPUB():
     def __init__(self, broker, clientId, port):
         self.mqtt = MQTT(broker, clientId, port, self)
-        self.messages = []
+        self.__message=json.load(open("dataFormat.json"))
+        self.messages  = []
 
     def start(self):
         self.mqtt.start()
@@ -23,11 +27,12 @@ class Monitor():
 
         #TODO controllo misurazioni con soglia 
 
-#aggiunto per mandare i dati sull'accendi spegni 
-    def sendData(self, topic, time, sens):
+
+    def sendData(self, deviceName, topic, time, turnOnOff):
         message = self.__message
-        message["bn"] = "Sensor1"
-        message["e"][0]["v"] = sens
+        message["bn"] = deviceName
+        message["e"][0]["n"] = "Schedule"       
+        message["e"][0]["v"] = turnOnOff 
         message["e"][0]["t"] = time
         self.mqtt.publish(topic, message)
 
@@ -36,64 +41,57 @@ class Monitor():
             print("Server error")
             
 
-
 if __name__ == "__main__":
-    # conf = json.load(open("conf.json"))
-    # top = json.load(open("MQTT-topics.json"))
+    conf = json.load(open("conf.json"))
+    broker = conf.get("broker")
+    port = conf.get("port")
+    mon = TimeShiftPUB(broker, "87932489743298432980", port)
+    mon.start()
 
-    # broker = conf.get("broker")
-    # port = conf.get("port")
-    # topic = top.get("topics").schedule.heating
 
-    # mon = Monitor(broker, "87932489743298432980", port)
-    # mon.start()
-    # mon.mqtt.subscribe(topic)
     flag = True
     starTime = time.mktime(time.localtime()) 
 
     while (1):
         
         actualTime = time.mktime(time.localtime())
-        convert = time.strftime("%H:%M:%S", time.gmtime(actualTime)) #convert actual time in hours
+        convert = time.strftime("%H:%M:%S", time.gmtime(actualTime+7200)) #convert actual time in hours
 
-        if (actualTime - starTime > 600) or flag: #controllo ogni 10 minuti
+        if (actualTime - starTime > 10) or flag: #controllo ogni 10 minuti
             flag = False
             starTime = actualTime
-            reqHome = request.urlopen('http://127.0.0.1:8080/getSchedules') #TODO bisogna espanderlo per tutte le device 
+            reqHome = request.urlopen('http://127.0.0.1:8080/getSchedules')
             dataHome = reqHome.read().decode('utf-8')
             schedules = json.loads(dataHome)
+
             for sched in schedules:         
                 startHour = sched["startHour"]
                 endHour = sched["endHour"]
-                #TODO con mqtt manda per ogni stanza
+
+                params = {
+                'room' : sched["deviceName"]}
+                query_string = urllib.parse.urlencode( params ) 
+                url = 'http://127.0.0.1:8080/getDevices'
+                url = url + "?" + query_string 
+
                 if convert >= startHour and convert <= endHour:
-                    print(sched["deviceName"], "   on")
+                    reqTopic = request.urlopen(url)
+                    topic = reqTopic.read().decode('utf-8')
+                    mon.mqtt.subscribe(topic)
+                    mon.sendData(sched["deviceName"], topic, convert, "on")
+
                 else :
-                    print(sched["deviceName"], "   off")
-            
+                    reqTopic = request.urlopen(url)
+                    topic = reqTopic.read().decode('utf-8')
+                    mon.mqtt.subscribe(topic)
+                    mon.sendData(sched["deviceName"], topic, convert, "off")
+
     
-    
-    # while (1):
-        
-        #TODO controllo orario --> accendi spegni -- publisher
+    mon.stop()  
 
-        #TODO controllo temperatura --> accendi spegni  -- publisher 
+    #TODO controllo temperatura --> accendi spegni  -- publisher     #è da fare da un altra parte
+    #TODO riceve misurazioni temperatura -- subscriber               #legato alla riga sopra 
 
-        #TODO riceve misurazioni temperatura -- subscriber 
+    #TODO tramite REST -- set the desired temperature of the room in the Home Catalog     # gestito da telegram 
+    # PERCHè DOVREBBE CAMBIARE LA TEMPERATURA?
 
-        #TODO tramite REST -- set the desired temperature of the room in the Home Catalog
-        # PERCHè DOVREBBE CAMBIARE LA TEMPERATURA?
-        #per fare le richieste post -- modificare il json
-    #     try:
-    #         r = requests.post('http://localhost/post/schedule', json={"key": "value"})
-
-    #         raise mon.ErrorType("Error message")
-    #     except mon.ErrorType as e: #code to run if error occurs
-    #         print("Temperatura non impostata")
-    #         #code to run if error is raised
-    #     else: 
-    #         pass
-
-    #     time.sleep(1)
-
-    # mon.stop()

@@ -23,6 +23,17 @@ class HomeCatalog(object):
                             self.schedules.append(schedule)
                     print(self.schedules)
                     return json.dumps(self.schedules)
+
+                #get per ottenere topic di una specifica stanza
+                elif uri[0] == 'getDevices':
+                    data = json.load(open("devices.json"))
+                    for dev in data["devicesList"]:
+                        if dev["deviceName"] == params["room"]:
+                            topic = dev["topic"]
+                    print(topic)
+                    return json.dumps(topic)
+
+
                 if uri[0] == 'getThreshold':
                     data = json.load(open("schedule.json"))
                     self.schedules = []
@@ -60,14 +71,6 @@ class HomeCatalog(object):
                     }
                 return json.dumps(filename)
 
-    
-            elif uri[0]=="getTopicsList":
-                data = json.load(open("MQTT-topics.json"))
-                self.topics = []
-                for topic in data["Topics"]:
-                     self.topics.append(topic)
-
-                return json.dumps(self.topics)
 
             elif uri[0] == "getSchedules":    
                 data = json.load(open("schedule.json"))
@@ -120,15 +123,7 @@ class HomeCatalog(object):
 
         if params=={} and len(uri)!=0:  
 
-            if uri[0]=="postTopicsList":
-                self.topics.append(data)
-                json_file = json.load(open("MQTT-topics.json"))
-                json_file["topicsList"] = self.topics
-                print(json_file)
-                with open("topics.json", "w") as file:
-                    json.dump(json_file, file)
-
-            elif uri[0] == "postAddDevice":  #crea nuovo dispositivo, e aggiunge schedule di default
+            if uri[0] == "postAddDevice":  #crea nuovo dispositivo, e aggiunge schedule di default
                 nDev = len(data)
 
                 if nDev > 3:
@@ -152,10 +147,15 @@ class HomeCatalog(object):
                         "deviceID": str(nDev),
                         "unit": "%"
                     }]
+                    #aggiunta canale
                     channels = json.load(open("channels.json"))
                     ch = channels["channel"][0][str(nDev)]
                     print("CHANN___", ch)
                     data[nDev-1]["channel"] = ch
+
+                    #aggiunta topic
+                    topic = "iot/heating_sistem/"+ data[nDev-1]["deviceName"]
+                    data[nDev-1]["topic"] = topic
 
                     json_file = json.load(open("devices.json"))
                     json_file["devicesList"] = data
@@ -163,6 +163,7 @@ class HomeCatalog(object):
                     with open("devices.json", "w") as file:
                         json.dump(json_file, file)
 
+                    #ggiunta schedule di default per nuovo dispositivo
                     sched = {"deviceName": data[nDev-1]["deviceName"],
                     "startHour":"08:00:00",
                     "endHour":"10:00:00",
@@ -172,7 +173,7 @@ class HomeCatalog(object):
                     json_file["schedules"].append(sched)
                     print("AAAAAAAAAAAAAAA",json_file)
                     with open("schedule.json", "w") as file:
-                        json.dump(json_file, file) #carica il file, aggiornando solo la lista schedules
+                        json.dump(json_file, file) #carica il file, aggiornando solo la lista schedules                        
     
                     return "successfully added"
 

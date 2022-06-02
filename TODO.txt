@@ -26,6 +26,12 @@ prende info sulle schedule dall'home CATALOG
 agisce sull'accendi e spegni: publisher sul devide connector
 riceve misurazioni: subscriber 
 
+#TODO controllo temperatura --> accendi spegni  -- publisher     #è da fare da un altra parte
+#TODO riceve misurazioni temperatura -- subscriber               #legato alla riga sopra 
+
+#TODO tramite REST -- set the desired temperature of the room in the Home Catalog     # gestito da telegram 
+# PERCHè DOVREBBE CAMBIARE LA TEMPERATURA?
+
 ENV Comfort
 ci sono delle parti commentate, de-commentarle quando aggiungi sensori alla rasp per raccolta dati, 
 al momento da errore per NoneType
@@ -40,7 +46,7 @@ TELEGRAM - Device connector
 
 
 DA FINIRE 
-time shift, manda la soglia richiesta per la stanza alla rasp tramite mqtt 
+CO service 
 
 da capire la creazione di canali su thinkspeak: si possono creare canala tramite richieste POST, 
 se vogliamo implementare seguire ----> https://it.mathworks.com/help/thingspeak/createchannel.html

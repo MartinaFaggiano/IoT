@@ -22,7 +22,8 @@
                     "unit": "%"
                 }
             ],
-            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=10"
+            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=10",
+            "topic": "iot/heating_sistem/RoomSystem_1"
         },
         {
             "deviceName": "RoomSystem_2",
@@ -46,7 +47,8 @@
                     "unit": "%"
                 }
             ],
-            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=2"
+            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=2",
+            "topic": "iot/heating_sistem/RoomSystem_2"
         }
     ]
 }

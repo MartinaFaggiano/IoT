@@ -10,7 +10,7 @@
         {
             "deviceName": "RoomSystem_2",
             "startHour": "08:00:00",
-            "endHour": "15:00:00",
+            "endHour": "12:15:00",
             "th_inf": "18",
             "th_sup": "21"
         }
