@@ -6,6 +6,7 @@ import sys
 import time
 from turtle import update
 from unicodedata import name
+import threading
 from matplotlib.font_manager import json_dump
 import telepot
 import urllib
@@ -15,6 +16,14 @@ from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 # from telegram import Update
 # from telegram.ext import Updater, CommandHandler, CallbackContext
 import requests
+
+class Co_control(threading.Thread):
+    def __init__(self, chromo):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        
+        self.proteinSequence = translate(self.chromo)
 
 class TelegramClass(object):
 

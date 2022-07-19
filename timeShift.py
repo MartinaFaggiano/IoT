@@ -69,7 +69,8 @@ if __name__ == "__main__":
                 endHour = sched["endHour"]
 
                 params = {
-                'room' : sched["deviceName"]}
+                'room' : sched["deviceName"],
+                'sensor': 'temp'}
                 query_string = urllib.parse.urlencode( params ) 
                 url = 'http://127.0.0.1:8080/getDevices'
                 url = url + "?" + query_string 

@@ -21,7 +21,7 @@ time shift: l'utente ha la possibilità di mandare le schedule del riscaldamento
 SYSTEM HEALTH  - FINITO
 controlla eventuali manlfunzionamenti del sistema
 
-TIME SHIFT
+TIME SHIFT 
 prende info sulle schedule dall'home CATALOG
 agisce sull'accendi e spegni: publisher sul devide connector
 riceve misurazioni: subscriber 
@@ -32,7 +32,7 @@ riceve misurazioni: subscriber
 #TODO tramite REST -- set the desired temperature of the room in the Home Catalog     # gestito da telegram 
 # PERCHè DOVREBBE CAMBIARE LA TEMPERATURA?
 
-ENV Comfort
+ENV Comfort 
 ci sono delle parti commentate, de-commentarle quando aggiungi sensori alla rasp per raccolta dati, 
 al momento da errore per NoneType
 
@@ -46,7 +46,9 @@ TELEGRAM - Device connector
 
 
 DA FINIRE 
-CO service 
+CO service : put chiamata per cambiare il valore di 'alarm'
+notifica di mqtt : cmabia lo stato di 'alarm' e teoricamente manda un messaggio a rasp 
+thread di telegram (C:\Users\marti\source\repos\iotexercise\iotexercise-main-training\training\5_MultiThreading\solutions\ex3.py)
 
 da capire la creazione di canali su thinkspeak: si possono creare canala tramite richieste POST, 
 se vogliamo implementare seguire ----> https://it.mathworks.com/help/thingspeak/createchannel.html

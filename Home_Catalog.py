@@ -29,9 +29,27 @@ class HomeCatalog(object):
                     data = json.load(open("devices.json"))
                     for dev in data["devicesList"]:
                         if dev["deviceName"] == params["room"]:
-                            topic = dev["topic"]
-                    print(topic)
+                            if params['sensor'] == 'temp':
+                                topic = dev["topic"]['heating']
+                            elif params['sensor'] == 'humidity':
+                                topic = dev["topic"]['humidity']
+                            else :
+                                topic = dev["topic"]['co']
                     return json.dumps(topic)
+
+            elif chiave == "rooms":
+                if uri[0] == 'getDevices':
+                    data = json.load(open("devices.json"))
+                    if 'all' == params["rooms"]:
+                        topics = []
+                        for dev in data["devicesList"]:
+                                if params['sensor'] == 'temp':
+                                    topics.append(dev["topic"]['heating'])
+                                elif params['sensor'] == 'humidity':
+                                    topics.append(dev["topic"]['humidity'])
+                                else :
+                                    topics.append(dev["topic"]['co'])
+                    return json.dumps(topics)
 
 
                 if uri[0] == 'getThreshold':
@@ -142,10 +160,11 @@ class HomeCatalog(object):
                         "unit": "%"
                     },
                     {
-                        "sensorName": "CO2",
+                        "sensorName": "CO",
                         "measureType": "level",
                         "deviceID": str(nDev),
-                        "unit": "%"
+                        "unit": "%",
+                        "alarm" : "off"
                     }]
                     #aggiunta canale
                     channels = json.load(open("channels.json"))
@@ -154,7 +173,10 @@ class HomeCatalog(object):
                     data[nDev-1]["channel"] = ch
 
                     #aggiunta topic
-                    topic = "iot/heating_sistem/"+ data[nDev-1]["deviceName"]
+                    topic = {
+                        "heating" : "iot/heating_sistem/"+ data[nDev-1]["deviceName"],
+                        "co" : "iot/co_control/"+ data[nDev-1]["deviceName"],
+                        "humidity" : "iot/humidity_control/"+ data[nDev-1]["deviceName"]}
                     data[nDev-1]["topic"] = topic
 
                     json_file = json.load(open("devices.json"))
@@ -171,7 +193,6 @@ class HomeCatalog(object):
                     "th_sup":"21"}
                     json_file = json.load(open("schedule.json"))
                     json_file["schedules"].append(sched)
-                    print("AAAAAAAAAAAAAAA",json_file)
                     with open("schedule.json", "w") as file:
                         json.dump(json_file, file) #carica il file, aggiornando solo la lista schedules                        
     
