@@ -59,9 +59,11 @@ class environmental():
     exposed = True
     def GET(self, *uri, **params):
 
-        reqHome = request.urlopen('http://127.0.0.1:8080/getThreshold')
-        dataHome = reqHome.read().decode('utf-8')
-        lista_threshold = json.loads(dataHome)
+
+        #TODO controllo a cosa serva
+        # reqHome = request.urlopen('http://127.0.0.1:8080/getThreshold')
+        # dataHome = reqHome.read().decode('utf-8')
+        # lista_threshold = json.loads(dataHome)
         
         if len(params)!=0 and len(uri)!=0:
             chiave = list(params.keys())[0]
@@ -70,8 +72,8 @@ class environmental():
                     
                     feeds = self.call_thinkspeak(params["room"]) 
                     temp =  float(feeds[1]['field1'])
-                    # hum =  float(feeds[1]['field2'])
-                    # co =  float(feeds[1]['field3'])
+                    hum =  float(feeds[1]['field2'])
+                    co =  float(feeds[1]['field3'])
 
                     if temp > 20:
                         return "VALORE OTTIMALE"
@@ -91,6 +93,24 @@ class environmental():
                     # if co > 33:
                     #     return "Co level:"+ temp + "\nLevel is too hight, OPEN THE WINDOWS!"  
         
+                if uri[0] == 'getCOstatus':
+
+                    #richiede alla home catalog il file di status
+                    reqHome = request.urlopen('http://127.0.0.1:8080/getStatusFile')
+                    dataHome = reqHome.read().decode('utf-8')
+                    filename_ = json.loads(dataHome)
+                    data = json.load(open(filename_["filename"]))
+
+                    #check status CO
+                    for dev in data["devicesList"]:
+                        statusCO = dev["statusCO"]
+                        if statusCO == 'fail':
+                            return 'CO level out of range in ' + dev['deviceName']
+
+                    return 'False'
+
+
+
   
 if __name__=="__main__":
     conf={

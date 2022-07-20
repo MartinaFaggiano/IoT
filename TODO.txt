@@ -46,8 +46,8 @@ TELEGRAM - Device connector
 
 
 DA FINIRE 
-CO service : put chiamata per cambiare il valore di 'alarm'
-notifica di mqtt : cmabia lo stato di 'alarm' e teoricamente manda un messaggio a rasp 
+CO service : 
+notifica di mqtt : e teoricamente manda un messaggio a rasp 
 thread di telegram (C:\Users\marti\source\repos\iotexercise\iotexercise-main-training\training\5_MultiThreading\solutions\ex3.py)
 
 da capire la creazione di canali su thinkspeak: si possono creare canala tramite richieste POST, 

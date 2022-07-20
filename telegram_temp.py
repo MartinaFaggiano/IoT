@@ -17,15 +17,45 @@ from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 # from telegram.ext import Updater, CommandHandler, CallbackContext
 import requests
 
-class Co_control(threading.Thread):
-    def __init__(self, chromo):
-        threading.Thread.__init__(self)
+# class Co_control(threading.Thread):
+#     def __init__(self, fromID, bot):
+#         threading.Thread.__init__(self)
+#         self.from_id = fromID
+#         self.bot = bot
 
-    def run(self):
+#     def run(self):
+#         params = {
+#             'room' : 'all'}
+#         query_string = urllib.parse.urlencode( params ) 
+#         url = 'http://127.0.0.1:8070/getCOstatus'
+#         url = url + "?" + query_string 
+
+#         reqHome = request.urlopen(url)
+#         dataHome = reqHome.read().decode('utf-8')
+#         # data_dictHome = json.loads(dataHome)
+#         if dataHome != 'False':
+#             self.bot.sendMessage(self.from_id, text=dataHome)
         
-        self.proteinSequence = translate(self.chromo)
 
-class TelegramClass(object):
+class TelegramClass(threading.Thread):
+    class Co_control(threading.Thread):
+        def __init__(self, fromID, bot):
+            threading.Thread.__init__(self)
+            self.from_id = fromID
+            self.bot = bot
+
+        def run(self):
+            params = {
+                'room' : 'all'}
+            query_string = urllib.parse.urlencode( params ) 
+            url = 'http://127.0.0.1:8070/getCOstatus'
+            url = url + "?" + query_string 
+
+            reqHome = request.urlopen(url)
+            dataHome = reqHome.read().decode('utf-8')
+            # data_dictHome = json.loads(dataHome)
+            if dataHome != 'False':
+                self.bot.sendMessage(self.from_id, text=dataHome)
 
     def __init__(self,tokenBot):
         self.deviceName = ""
@@ -35,16 +65,21 @@ class TelegramClass(object):
         self.th_inf = "m"
         self.th_sup = "n"
         self.next = ""
+        self.from_id = ""
 
 
         MessageLoop(self.bot, {'chat': self.on_chat_message,
                 'callback_query': self.on_callback_query}).run_as_thread()
-
+   
 
     #la funzione on_chat_message crea una inline keyboard
     def on_chat_message(self, msg):
-        content_type, chat_type, chat_id = telepot.glance(msg)
 
+        content_type, chat_type, chat_id = telepot.glance(msg)
+        self.from_id = chat_id
+
+        self.Threads = self.Co_control(self.from_id,self.bot)
+        self.Threads.start()
         if chat_id not in self.chatIDs:
             self.chatIDs.append(chat_id)
         message = msg['text']
@@ -112,6 +147,8 @@ class TelegramClass(object):
         #facciamo reagire alla pressione del pulsante
         
         query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
+
+        self.from_id = from_id
 
         print('Callback Query:', query_id, from_id, query_data)
 

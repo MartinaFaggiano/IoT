@@ -28,35 +28,6 @@
                 "co": "iot/co_control/RoomSystem_1",
                 "humidity": "iot/humidity_control/RoomSystem_1"
             }
-        },
-        {
-            "deviceName": "RoomSystem_2",
-            "device": [
-                {
-                    "sensorName": "Temp",
-                    "measureType": "temp",
-                    "deviceID": "2",
-                    "unit": "C"
-                },
-                {
-                    "sensorName": "Humidity",
-                    "measureType": "hum",
-                    "deviceID": "2",
-                    "unit": "%"
-                },
-                {
-                    "sensorName": "CO2",
-                    "measureType": "level",
-                    "deviceID": "2",
-                    "unit": "%"
-                }
-            ],
-            "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=2",
-            "topic": {
-                "heating": "iot/heating_sistem/RoomSystem_2",
-                "co": "iot/co_control/RoomSystem_2",
-                "humidity": "iot/humidity_control/RoomSystem_2"
-            }
         }
     ]
 }

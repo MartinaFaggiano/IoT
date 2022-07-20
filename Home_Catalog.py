@@ -88,6 +88,11 @@ class HomeCatalog(object):
                     "filename": "devices.json"
                     }
                 return json.dumps(filename)
+            elif uri[0] == "getStatusFile":  
+                filename = {
+                    "filename": "status.json"
+                    }
+                return json.dumps(filename)
 
 
             elif uri[0] == "getSchedules":    
@@ -181,7 +186,6 @@ class HomeCatalog(object):
 
                     json_file = json.load(open("devices.json"))
                     json_file["devicesList"] = data
-                    print(json_file)
                     with open("devices.json", "w") as file:
                         json.dump(json_file, file)
 
@@ -196,6 +200,17 @@ class HomeCatalog(object):
                     with open("schedule.json", "w") as file:
                         json.dump(json_file, file) #carica il file, aggiornando solo la lista schedules                        
     
+                    dataStatus = {
+                        "deviceName": data[nDev-1]["deviceName"],
+                        "statusCO": "ok"
+                    }
+
+                    json_file = json.load(open("status.json"))
+                    print(json_file['devicesList'])
+                    json_file["devicesList"].append(dataStatus)
+                    with open("status.json", "w") as file:
+                        json.dump(json_file, file)
+
                     return "successfully added"
 
         
