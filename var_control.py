@@ -4,7 +4,7 @@ import time
 from urllib import request, parse
 
 
-class CO_monitor():
+class Temp_monitor():
     def __init__(self, broker, clientID, port):
         self.mqtt = MQTT(broker, clientID, port, self)
         self.messages = []
@@ -17,14 +17,14 @@ class CO_monitor():
 
     def notify(self, topic, msg):
         payload = json.loads(msg)
-        if payload['e']['v'] > 1000: 
+        if payload['e']['v'] > 1000:  #modificare valore, soglia per stanza  
 
             reqHome = request.urlopen('http://127.0.0.1:8080/getStatusFile')
             dataHome = reqHome.read().decode('utf-8')
             filename_ = json.loads(dataHome)
             data = json.load(open(filename_["filename"]))
 
-            #check status CO
+            #check status Temp
             for dev in data["devicesList"]:
                 if topic.split('/')[-1] == dev['deviceName']:
                     dev["status"] = 'fail'
@@ -36,17 +36,23 @@ class CO_monitor():
 
             self.messages.append(payload)
              
-
+        hist = payload['e']['v']
         # print(f"Registered measure: \n {payload}")
 
-        
+    def sendData(self, deviceName, topic, time, turnOnOff):
+        message = self.__message
+        message["bn"] = deviceName
+        message["e"][0]["n"] = "Schedule"       
+        message["e"][0]["v"] = turnOnOff 
+        message["e"][0]["t"] = time
+        self.mqtt.publish(topic, message)  
 
 if __name__=="__main__":
     conf = json.load(open("conf.json"))
     broker = conf.get("broker")
     port = conf.get("port")
 
-    co_mon=CO_monitor(broker, "CoControl", port)
+    co_mon=Temp_monitor(broker, "TempControl", port)
     co_mon.start()
 
 
@@ -60,7 +66,7 @@ if __name__=="__main__":
         if (actualTime - starTime > 5) or flag: #controllo ogni 5 minuti
             params = {
             'rooms' : 'all',
-            'sensor': 'co'}
+            'sensor': 'temp'}
             query_string = parse.urlencode( params ) 
             url = 'http://127.0.0.1:8080/getDevices'
             url = url + "?" + query_string 
@@ -70,7 +76,6 @@ if __name__=="__main__":
         
             for top in topics: 
                 co_mon.mqtt.subcribe(top)
-
 
                 #TODO gestire pubblicazioni su questo topic lato rasp
 

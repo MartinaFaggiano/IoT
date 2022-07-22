@@ -37,6 +37,18 @@ class HomeCatalog(object):
                                 topic = dev["topic"]['co']
                     return json.dumps(topic)
 
+                elif uri[0] == 'getThreshold':
+                    data = json.load(open("schedule.json"))
+                    self.schedules = []
+                    for schedule in data["schedules"]:
+                        if schedule["deviceName"] == params["room"]:
+                            th = {
+                                "th_inf" : schedule["th_inf"],
+                                "th_sup" : schedule["th_sup"]
+                            }
+
+                    return json.dumps(th)
+
             elif chiave == "rooms":
                 if uri[0] == 'getDevices':
                     data = json.load(open("devices.json"))
@@ -52,17 +64,7 @@ class HomeCatalog(object):
                     return json.dumps(topics)
 
 
-                if uri[0] == 'getThreshold':
-                    data = json.load(open("schedule.json"))
-                    self.schedules = []
-                    for schedule in data["schedules"]:
-                        if schedule["deviceName"] == params["room"]:
-                            th = {
-                                "th_inf" : schedule["th_inf"],
-                                "th_sup" : schedule["th_sup"]
-                            }
 
-                    return json.dumps(th)
 
 
             if chiave == "mod":
@@ -202,7 +204,8 @@ class HomeCatalog(object):
     
                     dataStatus = {
                         "deviceName": data[nDev-1]["deviceName"],
-                        "statusCO": "ok"
+                        "statusCO": "ok",
+                        "power": "on"
                     }
 
                     json_file = json.load(open("status.json"))
@@ -224,19 +227,6 @@ class HomeCatalog(object):
                     json.dump(json_file, file)       
                     
     
-
-
-        # data = cherrypy.request.body.read()
-        # data = json.loads(data)
-        # self.devices.append(data)
-        # print(self.devices)
-
-        # json_file = json.load(open("devices.json"))
-        # json_file["devicesList"] = self.devices
-        # print(json_file)
-        # with open("devices.json", "w") as pippo:
-        #     json.dump(json_file, pippo)
-
     
 if __name__=="__main__":
     conf={

@@ -16,26 +16,7 @@ from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 # from telegram import Update
 # from telegram.ext import Updater, CommandHandler, CallbackContext
 import requests
-
-# class Co_control(threading.Thread):
-#     def __init__(self, fromID, bot):
-#         threading.Thread.__init__(self)
-#         self.from_id = fromID
-#         self.bot = bot
-
-#     def run(self):
-#         params = {
-#             'room' : 'all'}
-#         query_string = urllib.parse.urlencode( params ) 
-#         url = 'http://127.0.0.1:8070/getCOstatus'
-#         url = url + "?" + query_string 
-
-#         reqHome = request.urlopen(url)
-#         dataHome = reqHome.read().decode('utf-8')
-#         # data_dictHome = json.loads(dataHome)
-#         if dataHome != 'False':
-#             self.bot.sendMessage(self.from_id, text=dataHome)
-        
+      
 
 class TelegramClass(threading.Thread):
     class Co_control(threading.Thread):
@@ -45,17 +26,19 @@ class TelegramClass(threading.Thread):
             self.bot = bot
 
         def run(self):
-            params = {
-                'room' : 'all'}
-            query_string = urllib.parse.urlencode( params ) 
-            url = 'http://127.0.0.1:8070/getCOstatus'
-            url = url + "?" + query_string 
+            while(1):
+                params = {
+                    'room' : 'all'}
+                query_string = urllib.parse.urlencode( params ) 
+                url = 'http://127.0.0.1:8070/getCOstatus'
+                url = url + "?" + query_string 
 
-            reqHome = request.urlopen(url)
-            dataHome = reqHome.read().decode('utf-8')
-            # data_dictHome = json.loads(dataHome)
-            if dataHome != 'False':
-                self.bot.sendMessage(self.from_id, text=dataHome)
+                reqHome = request.urlopen(url)
+                dataHome = reqHome.read().decode('utf-8')
+                if dataHome != 'False':
+                    self.bot.sendMessage(self.from_id, text=dataHome)
+                    
+                time.sleep(180)
 
     def __init__(self,tokenBot):
         self.deviceName = ""

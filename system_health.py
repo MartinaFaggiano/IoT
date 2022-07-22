@@ -6,7 +6,7 @@ import json
 from urllib.parse import urljoin
 import cherrypy
 
-from numpy import mean
+from numpy import mean, power
 
 
 # immagazzina in una variabile la risposta dal GET response
@@ -14,7 +14,7 @@ class health():
     #classe per richiamare thinkspeak
     
     def __init__(self) :
-        self.on_ = True #TODO recuperare status vero
+        pass
 
     def evaluateMean(self, feeds):
         tempMedia = 0.0
@@ -57,33 +57,42 @@ class health():
         
         return temp
     
+    def power(self):
+        powerList = []
+        reqHome = request.urlopen('http://127.0.0.1:8080/getStatusFile')
+        dataHome = reqHome.read().decode('utf-8')
+        filename_ = json.loads(dataHome)
+        data = json.load(open(filename_["filename"]))
 
-  
+        powerList.append({data['deviceName']: data['power']})
+        return powerList
+
+        
     exposed = True
     def GET(self, *uri, **params):
         
         reqHome = request.urlopen('http://127.0.0.1:8080/getThreshold')
         dataHome = reqHome.read().decode('utf-8')
         lista_threshold = json.loads(dataHome)
-        
+        powerList = power()
+        powerJson = json.dumps(powerList)
         if len(params)==0 and len(uri)!=0:
             if uri[0] == 'getHealth':
-                if self.on_:  
-                    rooms = self.call_thinkspeak() 
-                    for i, room in enumerate(rooms): #cicla sulle room di teamspeak
-                        for j, rth in enumerate(lista_threshold):  #cicla sulle schedule 
-                            if room["deviceName"] == rth["deviceName"]:
-
+                rooms = self.call_thinkspeak() 
+                for i, room in enumerate(rooms): #cicla sulle room di teamspeak
+                    for j, rth in enumerate(lista_threshold):  #cicla sulle schedule 
+                        if room["deviceName"] == rth["deviceName"]:
+                            if powerJson[room["deviceName"]] == 'on':
                                 if int(room["meanTemperature"]) < int(rth["th_sup"]):
                                     room["status"]= "Check the system" 
                                 else:
                                     room["status"]= "Ok" 
-                    return json.dumps(rooms)
-                else:
-                    rooms = self.call_thinkspeak() 
-                    for i, room in enumerate(rooms):
-                        room["status"]= "OFF" 
-                    return json.dumps(rooms)
+                            else:
+                                rooms = self.call_thinkspeak() 
+                                for i, room in enumerate(rooms):
+                                    room["status"]= "OFF" 
+                return json.dumps(rooms)
+                
         
                 
 
