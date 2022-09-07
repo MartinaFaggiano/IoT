@@ -1,4 +1,3 @@
-import sched
 import cherrypy
 import json
 
@@ -11,6 +10,57 @@ class HomeCatalog(object):
     exposed = True
     def GET(self, *uri, **params):
         
+        if len(uri)!=0:  
+
+            if uri[0] == "postDELDevice":  #Delete the specified devices
+                chiave = list(params.keys())[0]
+                if chiave == 'room':
+
+                    nDev = params['room']
+                    json_file = json.load(open("devices.json"))
+                    data = []
+                    for e in json_file['devicesList']: 
+
+                        if nDev not in e['deviceName']:
+                            data.append(e)
+                        else: 
+                            ch = e['channel']
+                            channels = json.load(open("channels.json"))
+                            num =  nDev.split('_')[1]
+                            channels["channel"][0][str(num)] = ch
+
+                            with open("channels.json", "w") as file:
+                                json.dump(channels, file)                   
+            
+
+                    json_file = json.load(open("devices.json"))
+                    json_file["devicesList"] = data
+                    with open("devices.json", "w") as file:
+                        json.dump(json_file, file)
+
+                    json_file = json.load(open("schedule.json"))
+                    data = []
+                    for e in json_file['schedules']: 
+
+                        if nDev not in e['deviceName']:
+                            data.append(e)
+
+                    json_file["schedules"] = data
+                    with open("schedule.json", "w") as file:
+                        json.dump(json_file, file)                    
+    
+
+                    json_file = json.load(open("status.json"))
+                    data = []
+                    for e in json_file['devicesList']:
+                        if nDev not in e['deviceName']:
+                            data.append(e)
+
+                    json_file["devicesList"] = data
+                    with open("status.json", "w") as file:
+                        json.dump(json_file, file)
+
+                    return "successfully deleted"
 
         if len(params)!=0 and len(uri)!=0:
             chiave = list(params.keys())[0]
@@ -176,8 +226,11 @@ class HomeCatalog(object):
                     #aggiunta canale
                     channels = json.load(open("channels.json"))
                     ch = channels["channel"][0][str(nDev)]
-                    print("CHANN___", ch)
                     data[nDev-1]["channel"] = ch
+                    
+                    channels["channel"][0][str(nDev)] = ''
+                    with open("channels.json", "w") as file:
+                        json.dump(channels, file)   
 
                     #aggiunta topic
                     topic = {
@@ -215,19 +268,15 @@ class HomeCatalog(object):
                         json.dump(json_file, file)
 
                     return "successfully added"
-
-        
+       
 
             elif uri[0] == "postSchedule": 
-                # self.schedules.append(data)
                 json_file = json.load(open("schedule.json"))
                 json_file["schedules"] = data["schedules"]
                 
                 with open("schedule.json", "w") as file:
                     json.dump(json_file, file)       
                     
-    
-    
 if __name__=="__main__":
     conf={
         '/':{
@@ -235,4 +284,7 @@ if __name__=="__main__":
             'tool.session.on' : True
         }
     }
-    cherrypy.quickstart(HomeCatalog(), '/', conf)
+    cherrypy.config.update({'server.socket_host': '192.168.43.77'})
+    cherrypy.config.update({'server.socket_port':8080})
+    cherrypy.tree.mount(HomeCatalog(), '/', conf)
+    cherrypy.engine.start()
