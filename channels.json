@@ -1,10 +1,19 @@
 {
-    "channel": [
+    "channelList":[
         {
-            "1": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=10",
-            "2": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=2",
-            "3": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=3"
-
+            "id": "1",
+            "code": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=10",
+            "status": "busy"
+        },
+        {
+            "id": "2",
+            "code": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=2",
+            "status": "idle"
+        },
+        {
+            "id": "3",
+            "code": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=3",
+            "status": "idle"
         }
     ]
 }
