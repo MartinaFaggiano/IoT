@@ -48,7 +48,3 @@ TELEGRAM - Device connector
 DA FINIRE 
 CO_control: manca lato rasp più test mqtt  
 
-
-
-da capire la creazione di canali su thinkspeak: si possono creare canala tramite richieste POST, 
-se vogliamo implementare seguire ----> https://it.mathworks.com/help/thingspeak/createchannel.html

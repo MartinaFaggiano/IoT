@@ -1,13 +1,26 @@
+from concurrent.futures import thread
+from threading import Thread
 from MyMQTT import MQTT
 import json 
 import time
 from urllib import request, parse
+import threading
 
 
-class Temp_monitor():
+class Temp_monitor(threading.Thread):
     def __init__(self, broker, clientID, port):
         self.mqtt = MQTT(broker, clientID, port, self)
         self.messages = []
+
+        conf = json.load(open("conf.json"))        
+        self.ipCatalog = conf.get("rest")["HomeCatalog"]["ip"]
+        self.portCatalog = conf.get("rest")["HomeCatalog"]["port"]
+
+        # self.ipHealth = conf.get("rest")["Health"]["ip"]
+        # self.portHealth = conf.get("rest")["Health"]["port"]
+
+        # self.ipEnv = conf.get("rest")["Env"]["ip"]
+        # self.portEnv = conf.get("rest")["Env"]["port"]
 
     def start(self):
         self.mqtt.start()
@@ -15,11 +28,11 @@ class Temp_monitor():
     def stop(self):
         self.mqtt.stop
 
-    def notify(self, topic, msg):
+    def notify(self, topic, msg): #TODO
         payload = json.loads(msg)
-        if payload['e']['v'] > 1000:  #modificare valore, soglia per stanza  
+        if payload['e']['v'] > 1000: 
 
-            reqHome = request.urlopen('http://127.0.0.1:8080/getStatusFile')
+            reqHome = request.urlopen(self.ipCatalog+ ':' +  self.portCatalog + '/getStatusFile')
             dataHome = reqHome.read().decode('utf-8')
             filename_ = json.loads(dataHome)
             data = json.load(open(filename_["filename"]))
@@ -31,13 +44,11 @@ class Temp_monitor():
             with open(filename_["filename"], "w") as file:
                     json.dump(data, file)
 
-            #serve per mandare il messaggio di apertura finestre al rasp. TODO lato rasp subscriber
+            #serve per mandare il messaggio di apertura finestre al rasp.
             self._paho_mqtt.publish(topic+'/act', json.dumps(msg), 2)
 
             self.messages.append(payload)
              
-        hist = payload['e']['v']
-        # print(f"Registered measure: \n {payload}")
 
     def sendData(self, deviceName, topic, time, turnOnOff):
         message = self.__message
@@ -47,38 +58,42 @@ class Temp_monitor():
         message["e"][0]["t"] = time
         self.mqtt.publish(topic, message)  
 
+
 if __name__=="__main__":
     conf = json.load(open("conf.json"))
-    broker = conf.get("broker")
-    port = conf.get("port")
+    broker = conf.get('mqtt')['broker']
+    portMQTT = conf.get('mqtt')['port']
 
-    co_mon=Temp_monitor(broker, "TempControl", port)
-    co_mon.start()
+    ipCatalog = conf.get("rest")["HomeCatalog"]["ip"]
+    portCatalog = conf.get("rest")["HomeCatalog"]["port"]
+
+    tm_mon=Temp_monitor(broker, "TempControl", portMQTT)
+    tm_mon.start()
 
 
     flag = True
-    starTime = time.mktime(time.localtime()) 
-    while (1) :
+    starTime = time.mktime(time.localtime)
+    while 1:
         actualTime = time.mktime(time.localtime())
         convert = time.strftime("%H:%M:%S", time.gmtime(actualTime+7200)) #convert actual time in hours
-
-        #iscrizione ai topic di tutte le stanze
         if (actualTime - starTime > 5) or flag: #controllo ogni 5 minuti
             params = {
             'rooms' : 'all',
             'sensor': 'temp'}
             query_string = parse.urlencode( params ) 
-            url = 'http://127.0.0.1:8080/getDevices'
+            url = ipCatalog+ ':' +  portCatalog + '/getDevices'
             url = url + "?" + query_string 
 
             reqTopic = request.urlopen(url)
             topics = reqTopic.read().decode('utf-8')
-        
+            topics = topics.replace('[', '')
+            topics = topics.replace(']', '')
+            topics = topics.replace('"', '')
+            topics = topics.split(',')
+
             for top in topics: 
-                co_mon.mqtt.subcribe(top)
+                tm_mon.mqtt.subscribe(top)
+        
+        time.sleep(300)
 
-                #TODO gestire pubblicazioni su questo topic lato rasp
 
-    
-
-    co_mon.stop()

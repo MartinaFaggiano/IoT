@@ -4,8 +4,7 @@ import urllib
 from MyMQTT import MQTT
 import json 
 import time
-import requests
-from urllib import request
+from urllib import request, parse
 import os 
 
 class TimeShiftPUB():
@@ -20,13 +19,13 @@ class TimeShiftPUB():
     def stop(self):
         self.mqtt.stop()
 
-    def notify(self, topic, msg):
-        payload = json.loads(msg)
-        self.messages.append(payload)
-        print("Measurament\n %s" % payload)
-
-        #TODO controllo misurazioni con soglia 
-
+    # def notify(self, topic, msg):
+    #     msg = msg.decode('utf-8').replace('=', ':')
+        # print(msg)
+        # if msg != None: 
+            # payload = json.loads(msg)
+            # self.messages.append(payload)
+            # print("Measurament\n %s" % msg)
 
     def sendData(self, deviceName, topic, time, turnOnOff):
         message = self.__message
@@ -35,32 +34,35 @@ class TimeShiftPUB():
         message["e"][0]["v"] = turnOnOff 
         message["e"][0]["t"] = time
         self.mqtt.publish(topic, message)
+        print(message)
 
     def ErrorType(self, e):
         if e == 400:
             print("Server error")
-            
 
-if __name__ == "__main__":
+
+if __name__=="__main__": 
     conf = json.load(open("conf.json"))
-    broker = conf.get("broker")
-    port = conf.get("port")
-    mon = TimeShiftPUB(broker, "87932489743298432980", port)
+    broker = conf.get('mqtt')['broker']
+    portMQTT = conf.get('mqtt')['port']
+    ipCatalog = conf.get("rest")["HomeCatalog"]["ip"]
+    portCatalog = conf.get("rest")["HomeCatalog"]["port"]
+
+    mon=TimeShiftPUB(broker, "TempControl1234", portMQTT)
     mon.start()
 
-
+    
     flag = True
     starTime = time.mktime(time.localtime()) 
 
-    while (1):
-        
+    while 1:
         actualTime = time.mktime(time.localtime())
         convert = time.strftime("%H:%M:%S", time.gmtime(actualTime+7200)) #convert actual time in hours
 
-        if (actualTime - starTime > 10) or flag: #controllo ogni 10 minuti
+        if (actualTime - starTime > 600) or flag: #controllo ogni 10 minuti
             flag = False
             starTime = actualTime
-            reqHome = request.urlopen('http://127.0.0.1:8080/getSchedules')
+            reqHome = request.urlopen(ipCatalog+ ':' +  portCatalog + '/getSchedules')
             dataHome = reqHome.read().decode('utf-8')
             schedules = json.loads(dataHome)
 
@@ -71,28 +73,30 @@ if __name__ == "__main__":
                 params = {
                 'room' : sched["deviceName"],
                 'sensor': 'temp'}
-                query_string = urllib.parse.urlencode( params ) 
-                url = 'http://127.0.0.1:8080/getDevices'
+                query_string = parse.urlencode( params ) 
+                url = ipCatalog+ ':' +  portCatalog + '/getDevices'
                 url = url + "?" + query_string 
 
                 if convert >= startHour and convert <= endHour:
                     reqTopic = request.urlopen(url)
                     topic = reqTopic.read().decode('utf-8')
-                    mon.mqtt.subscribe(topic)
-                    mon.sendData(sched["deviceName"], topic, convert, "on")
+                    topics = topic.replace('[', '')
+                    topics = topics.replace(']', '')
+                    topics = topics.replace('"', '')
+                    topic = topics.split(',')
+                    # mon.mqtt.subscribe(topic+'/act')
+                    mon.sendData(sched["deviceName"], topic+'/act', convert, "on")
 
                 else :
                     reqTopic = request.urlopen(url)
                     topic = reqTopic.read().decode('utf-8')
-                    mon.mqtt.subscribe(topic)
-                    mon.sendData(sched["deviceName"], topic, convert, "off")
+                    topics = topic.replace('[', '')
+                    topics = topics.replace(']', '')
+                    topics = topics.replace('"', '')
+                    topics = topics.split(',')
 
-    
-    mon.stop()  
+                    # mon.mqtt.subscribe(topic+'/act')
+                    mon.sendData(sched["deviceName"], topic+'act', convert, "off")
 
-    #TODO controllo temperatura --> accendi spegni  -- publisher     #è da fare da un altra parte
-    #TODO riceve misurazioni temperatura -- subscriber               #legato alla riga sopra 
-
-    #TODO tramite REST -- set the desired temperature of the room in the Home Catalog     # gestito da telegram 
-    # PERCHè DOVREBBE CAMBIARE LA TEMPERATURA?
-
+            
+            

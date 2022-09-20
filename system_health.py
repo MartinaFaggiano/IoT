@@ -11,10 +11,12 @@ from numpy import mean, power
 
 
 class Health():
-    #classe per richiamare thinkspeak
     
     def __init__(self) :
-        pass
+        conf = json.load(open("conf.json"))
+
+        self.ipCatalog = conf.get("rest")["HomeCatalog"]["ip"]
+        self.portCatalog = conf.get("rest")["HomeCatalog"]["port"]
 
     def evaluateMean(self, feeds):
         tempMedia = 0.0
@@ -25,15 +27,20 @@ class Health():
         tempMedia = round(tempMedia/(cnt),2)
         return tempMedia
 
-    def call_thinkspeak(self):
-        
-        reqHome = request.urlopen('http://192.168.43.77:8080/getDevicesFile')
+    #classe per richiamare thinkspeak
+    def call_thinkspeak(self, chatid):
+        params = {
+            'chatid' : chatid}
+
+        query_string = urllib.parse.urlencode( params ) 
+        url = self.ipCatalog+ ':' +  self.portCatalog + '/getDevicesList'
+        url = url + "?" + query_string 
+        reqHome = request.urlopen(url)
         dataHome = reqHome.read().decode('utf-8')
-        filename_ = json.loads(dataHome)
-        data = json.load(open(filename_["filename"]))
+        data = json.loads(dataHome)
 
         urlJsons = []
-        for dev in data["devicesList"]:
+        for dev in data:
                 urlJsons.append({
                     "deviceName":dev["deviceName"],
                     "channel": dev["channel"]
@@ -42,15 +49,10 @@ class Health():
         temp = []
         for i, ch in enumerate(urlJsons):
             response = request.urlopen(ch["channel"])
-
-            # preleva i dati json dalla richiesta
             data = response.read().decode('utf-8')
-
-            # convertiamo la stringa in dizionario
             data_dict = json.loads(data)
-
-            #separiamo i valori che ci interessano
             feeds = data_dict['feeds']
+
             temp.append({
                     "deviceName":ch["deviceName"],
                     "meanTemperature": self.evaluateMean(feeds),
@@ -61,7 +63,7 @@ class Health():
     
     def power_OnOff(self):
         powerList = []
-        reqHome = request.urlopen('http://192.168.43.77:8080/getStatusFile')
+        reqHome = request.urlopen(self.ipCatalog+ ':' +  self.portCatalog + '/getStatusFile')
         dataHome = reqHome.read().decode('utf-8')
         filename_ = json.loads(dataHome)
         data = json.load(open(filename_["filename"]))
@@ -74,15 +76,16 @@ class Health():
     exposed = True
     def GET(self, *uri, **params):
         
-        reqHome = request.urlopen('http://192.168.43.77:8080/getThreshold')
+        reqHome = request.urlopen(self.ipCatalog+ ':' +  self.portCatalog + '/getThreshold')
         dataHome = reqHome.read().decode('utf-8')
         lista_threshold = json.loads(dataHome)
         powerList = self.power_OnOff()
         powerJson = json.dumps(powerList)
 
-        if len(params)==0 and len(uri)!=0:
-            if uri[0] == 'getHealth':
-                rooms = self.call_thinkspeak() 
+        if len(params)!=0 and len(uri)!=0:
+            chiave = list(params.keys())[0]
+            if uri[0] == 'getHealth' and chiave == 'chatid':
+                rooms = self.call_thinkspeak(params['chatid']) 
                 for i, room in enumerate(rooms): #cicla sulle room di teamspeak
                     for j, rth in enumerate(lista_threshold):  #cicla sulle schedule 
                         if room["deviceName"] == rth["deviceName"]:

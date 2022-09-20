@@ -14,11 +14,17 @@ class Environmental():
     #classe per richiamare thinkspeak
     
     def __init__(self) :
-          self.threshold = 20
+        self.threshold = 20
+        conf = json.load(open("conf.json"))
+
+        self.ipCatalog = conf.get("rest")["HomeCatalog"]["ip"]
+        self.portCatalog = conf.get("rest")["HomeCatalog"]["port"]
+
+
  
     def call_thinkspeak(self, room):
 
-        reqHome = request.urlopen('http://192.168.43.77:8080/getDevicesFile')
+        reqHome = request.urlopen(self.ipCatalog+ ':' +  self.portCatalog + '/getDevicesFile')
         dataHome = reqHome.read().decode('utf-8')
         filename_ = json.loads(dataHome)
         data = json.load(open(filename_["filename"]))
@@ -28,14 +34,8 @@ class Environmental():
                 urlJson = dev["channel"]
 
         response = request.urlopen(urlJson)
-
-        # preleva i dati json dalla richiesta
         data = response.read().decode('utf-8')
-
-        # convertiamo la stringa in dizionario
         data_dict = json.loads(data)
-
-        #separiamo i valori che ci interessano
         feeds = data_dict['feeds']
         
         return feeds
@@ -43,16 +43,15 @@ class Environmental():
     exposed = True
     def GET(self, *uri, **params):
 
-        
         if len(params)!=0 and len(uri)!=0:
             chiave = list(params.keys())[0]
             if chiave == "room":
                 if uri[0] == 'getComfort':
                     
                     feeds = self.call_thinkspeak(params["room"]) 
-                    temp =  float(feeds[1]['field1'])
-                    hum =  float(feeds[1]['field2'])
-                    co =  float(feeds[1]['field3'])
+                    temp =  float(feeds[-1]['field1'])
+                    hum =  float(feeds[-1]['field2'])
+                    co =  float(feeds[-1]['field3'])
 
                     if temp > self.threshold and temp < 23:
                         if hum < 60 and hum > 20: 
@@ -68,16 +67,16 @@ class Environmental():
                     
                     if co > 1000:
                         return "Co level:"+ str(co) + ' ppm' + "\nDangerous quantity, OPEN THE WINDOWS!"  
-            # elif chiave == "all":        
+            elif chiave == "all":        
                 if uri[0] == 'getCOstatus':
 
                     #richiede alla home catalog il file di status
-                    reqHome = request.urlopen('http://192.168.43.77:8080/getStatusFile')
+                    reqHome = request.urlopen(self.ipCatalog+ ':' +  self.portCatalog + '/getStatusFile')
                     dataHome = reqHome.read().decode('utf-8')
                     filename_ = json.loads(dataHome)
                     data = json.load(open(filename_["filename"]))
 
-                    #check status CO
+                    #check status CO #TODO sistemare chiamata per stanze dell'utente
                     for dev in data["devicesList"]:
                         statusCO = dev["statusCO"]
                         if statusCO == 'fail':

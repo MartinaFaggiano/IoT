@@ -1,5 +1,7 @@
 from cgi import parse_header
-# from curses.panel import bottom_panel
+import datetime
+from http.client import ResponseNotReady
+from ipaddress import ip_network
 import json
 import logging
 import sys
@@ -13,10 +15,8 @@ import urllib
 from urllib import request
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
-# from telegram import Update
-# from telegram.ext import Updater, CommandHandler, CallbackContext
 import requests
-      
+from dateutil import parser
 
 class TelegramClass(threading.Thread):
     class Co_control(threading.Thread):
@@ -24,13 +24,17 @@ class TelegramClass(threading.Thread):
             threading.Thread.__init__(self)
             self.from_id = fromID
             self.bot = bot
+            conf = json.load(open("conf.json"))
+
+            self.ipEnv = conf.get("rest")["Env"]["ip"]
+            self.portEnv = conf.get("rest")["Env"]["port"]
 
         def run(self):
             while(1):
                 params = {
                     'room' : 'all'}
                 query_string = urllib.parse.urlencode( params ) 
-                url = 'http://127.0.0.1:8070/getCOstatus'
+                url = self.ipEnv+ ':' +  self.portEnv + '/getCOstatus'
                 url = url + "?" + query_string 
 
                 reqHome = request.urlopen(url)
@@ -40,16 +44,26 @@ class TelegramClass(threading.Thread):
                     
                 time.sleep(180)
 
-    def __init__(self,tokenBot):
+    def __init__(self):
         self.deviceName = ""
-        self.tokenBot = tokenBot
         self.chatIDs = []
-        self.bot = telepot.Bot(self.tokenBot)
         self.th_inf = "m"
         self.th_sup = "n"
         self.next = ""
         self.from_id = ""
+        
+        conf = json.load(open("conf.json"))   
+        self.tokenBot = conf.get("telegram")["token"]     
+        self.ipCatalog = conf.get("rest")["HomeCatalog"]["ip"]
+        self.portCatalog = conf.get("rest")["HomeCatalog"]["port"]
 
+        self.ipHealth = conf.get("rest")["Health"]["ip"]
+        self.portHealth = conf.get("rest")["Health"]["port"]
+
+        self.ipEnv = conf.get("rest")["Env"]["ip"]
+        self.portEnv = conf.get("rest")["Env"]["port"]
+
+        self.bot = telepot.Bot(self.tokenBot)
 
         MessageLoop(self.bot, {'chat': self.on_chat_message,
                 'callback_query': self.on_callback_query}).run_as_thread()
@@ -66,25 +80,26 @@ class TelegramClass(threading.Thread):
         if chat_id not in self.chatIDs:
             self.chatIDs.append(chat_id)
         message = msg['text']
-        if message == "ciao":
+        if message == "Menu":
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text='Temperature', callback_data='temp')],
                 [InlineKeyboardButton(text='Umidity', callback_data='umid')],
+                [InlineKeyboardButton(text='CO level', callback_data='co')],
                 [InlineKeyboardButton(text='Threshold', callback_data='threshold')],
                 [InlineKeyboardButton(text='Schedule', callback_data='sched')],
-                [InlineKeyboardButton(text='Add new device', callback_data='newDevice')],
                 [InlineKeyboardButton(text='Comfort', callback_data='getComfort')],
-                [InlineKeyboardButton(text='Control System Health', callback_data='getHealth')]
+                [InlineKeyboardButton(text='Control System Health', callback_data='getHealth')],
+                [InlineKeyboardButton(text='Add new device', callback_data='newDevice')],
+                [InlineKeyboardButton(text='Delete a device', callback_data='delDev')]
+
             ])
 
-            self.bot.sendMessage(chat_id, 'Usa il menu per mostrare i valori dela tua WeatherStation', reply_markup=keyboard)
+            self.bot.sendMessage(chat_id, 'Use the menu to manage your Smart Home system', reply_markup=keyboard)
 
         elif message.split(" ")[0].isnumeric():
             self.th_inf = message.split(" ")[0]
             self.th_sup = message.split(" ")[1]
             if('modThreshold' in self.next):
-
-                # self.bot.update.message.reply_text('What do you want to name this dog?')
 
                 json_data = json.dumps( {"schedules": [
                 {
@@ -95,7 +110,7 @@ class TelegramClass(threading.Thread):
                 params = {
                     'room' : self.deviceName}
                 query_string = urllib.parse.urlencode( params ) 
-                url = 'http://127.0.0.1:8080/postThreshold'
+                url = self.ipCatalog+ ':' +  self.portCatalog + '/postThreshold'
                 url = url + "?" + query_string 
 
                 re = requests.post(url, 
@@ -111,42 +126,65 @@ class TelegramClass(threading.Thread):
     #la funzione on_callback_query processa i dati da Thingspeak e reagisce a seconda del pulsante premuto
         
     def on_callback_query(self, msg):
-        # immagazzina in una variabile la risposta dal GET response
-
-        response = request.urlopen('https://api.thingspeak.com/channels/1669938/feeds.json?api_key=4D9OPXEJK7T63SVN&results=2')
-
-        # preleva i dati json dalla richiesta
-
-        data = response.read().decode('utf-8')
-
-        # convertiamo la stringa in dizionario
-
-        data_dict = json.loads(data)
-
-        #separiamo i valori che ci interessano
-
-        feeds = data_dict['feeds']
-
         #facciamo reagire alla pressione del pulsante
-        
         query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
-
         self.from_id = from_id
-
         print('Callback Query:', query_id, from_id, query_data)
 
+        #recupera i dati da thingspeak
+        feeds = []
+        roomID = []
+        if query_data == 'temp' or query_data == 'umid' or query_data == 'co': 
+
+            params = {
+                'chatid' : self.from_id}
+            query_string = urllib.parse.urlencode( params ) 
+            url = self.ipCatalog+ ':' +  self.portCatalog + '/getDevicesList' + "?" + query_string
+            reqHome = request.urlopen(url)
+            dataHome = reqHome.read().decode('utf-8')
+            lista_device = json.loads(dataHome)
+
+            for ch in lista_device:
+                roomID.append(ch['deviceName'])
+                data_dict = json.loads(request.urlopen(ch['channel']).read().decode('utf-8'))
+                feeds.append(data_dict['feeds'])
+
+        #BUTTON
         if(query_data == 'temp'):
-            self.bot.sendMessage(from_id, text='La Temperatura è di: ' + feeds[1]['field1'] + '°C')
-            
+            cont = 1
+            for feed in feeds: 
+                if feed:
+                    dataOra = str(parser.isoparse(feed[-1]['created_at'])) 
+                    self.bot.sendMessage(from_id, text= dataOra.split('+')[0] + ': The temperature in '+ str(roomID[cont-1]) +' is ' + feed[-1]['field1'] + '°C')
+                cont += 1
+
+        #BUTTON
         elif(query_data == 'umid'):
-            self.bot.sendMessage(from_id, text="L'Umidità è il: " + feeds[1]['field2'] + '%')
+            cont = 1
+            for feed in feeds: 
+                if feed:
+                    dataOra = str(parser.isoparse(feed[-1]['created_at'])) 
+                    self.bot.sendMessage(from_id, text= dataOra.split('+')[0] + ': The humidity in '+ str(roomID[cont-1]) +' is ' + feed[-1]['field2'] + '%')
+                cont += 1
             
+        #BUTTON   
         elif(query_data == 'co'):
-            self.bot.sendMessage(from_id, text='La Pressione è di: ' + feeds[1]['field3'] + ' mbar')
+            cont = 1
+            for feed in feeds: 
+                if feed:
+                    dataOra = str(parser.isoparse(feed[-1]['created_at'])) 
+                    self.bot.sendMessage(from_id, text= dataOra.split('+')[0] + ': The CO level in '+ str(roomID[cont-1]) +' is ' + feed[-1]['field3'] + 'ppm')
+                cont += 1
+
             
-        if query_data == "sched" or query_data == "getComfort" or query_data == "threshold":
+        if query_data == "sched" or query_data == "getComfort" or query_data == "threshold" or query_data == "delDev":
             self.utility = query_data
-            reqHome = request.urlopen('http://127.0.0.1:8080/getDevicesList')
+            params = {
+                'chatid' : self.from_id}
+            query_string = urllib.parse.urlencode( params ) 
+            url = self.ipCatalog+ ':' +  self.portCatalog + '/getDevicesList'
+            url = url + "?" + query_string 
+            reqHome = request.urlopen(url)
             dataHome = reqHome.read().decode('utf-8')
             lista_device = json.loads(dataHome)
             buttons = [[]]
@@ -162,22 +200,20 @@ class TelegramClass(threading.Thread):
             if self.utility == "sched": 
                 
                 keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                        # [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data= deviceName)],
-                        [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data= 'get_schedule_heating')],
-                        [InlineKeyboardButton(text='Modifica orario', callback_data='post_schedule_heating')]
+                        [InlineKeyboardButton(text='Display schedule', callback_data= 'get_schedule_heating')],
+                        [InlineKeyboardButton(text='Modify', callback_data='post_schedule_heating')]
                     ])
 
-                x = self.bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
+                x = self.bot.sendMessage(from_id, 'Use the below menu', reply_markup=keyboard)
             elif self.utility == "getComfort":
                 params = {
                     'room' : self.deviceName}
                 query_string = urllib.parse.urlencode( params ) 
-                url = 'http://127.0.0.1:8070/getComfort'
+                url = self.ipEnv+ ':' +  self.portEnv + '/getComfort'
                 url = url + "?" + query_string 
 
                 reqHome = request.urlopen(url)
                 dataHome = reqHome.read().decode('utf-8')
-                # data_dictHome = json.loads(dataHome)
 
                 self.bot.sendMessage(from_id, text = dataHome)
 
@@ -185,23 +221,33 @@ class TelegramClass(threading.Thread):
                 params = {
                     'room' : self.deviceName}
                 query_string = urllib.parse.urlencode( params ) 
-                url = 'http://127.0.0.1:8080/getThreshold'
+                url = self.ipCatalog+ ':' +  self.portCatalog + '/getThreshold'
+                url = url + "?" + query_string 
+
+                reqHome = request.urlopen(url)
+                dataHome = json.loads(reqHome.read().decode('utf-8'))
+
+                self.bot.sendMessage(from_id, text = "Current operating threshold of the heating system")
+                self.bot.sendMessage(from_id, text = dataHome['th_inf'] + ' - ' + dataHome['th_sup'])
+
+                keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                        [InlineKeyboardButton(text='Modify thresholds heating system', callback_data= 'modThresholdMess')]
+                    ])
+                
+                x = self.bot.sendMessage(from_id, 'To modify the settings uses the below button', reply_markup=keyboard)
+                
+            elif self.utility == "delDev":
+                params = {
+                    'room' : self.deviceName,
+                    'chatid' : from_id}
+                query_string = urllib.parse.urlencode( params ) 
+                url = self.ipCatalog+ ':' +  self.portCatalog + '/postDELDevice'
                 url = url + "?" + query_string 
 
                 reqHome = request.urlopen(url)
                 dataHome = reqHome.read().decode('utf-8')
-                # data_dictHome = json.loads(dataHome)
 
-                self.bot.sendMessage(from_id, text = dataHome)
-
-                keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                        # [InlineKeyboardButton(text='Visualizzare Schedule Riscaldamento', callback_data= deviceName)],
-                        [InlineKeyboardButton(text='Modify thresholds heating system', callback_data= 'modThresholdMess')],
-                        [InlineKeyboardButton(text='Exit', callback_data='exit')] # TODO
-                    ])
-                
-                x = self.bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
-                
+                self.bot.sendMessage(from_id, text = "Request processed")
 
         if('modThresholdMess' in query_data):
 
@@ -213,13 +259,13 @@ class TelegramClass(threading.Thread):
             params = {
                 'room' : self.deviceName}
             query_string = urllib.parse.urlencode( params ) 
-            url = 'http://127.0.0.1:8080/getSchedules'
+            url = self.ipCatalog+ ':' +  self.portCatalog + '/getSchedules'
             url = url + "?" + query_string 
 
             reqHome = request.urlopen(url)
             dataHome = reqHome.read().decode('utf-8')
             data_dictHome = json.loads(dataHome)
-            self.bot.sendMessage(from_id, text="Schedule: /n start:" + data_dictHome[0]['startHour'] +",/n end:" +  data_dictHome[0]['endHour'])
+            self.bot.sendMessage(from_id, text="Schedule: \n start:" + data_dictHome[0]['startHour'] +",\n end:" +  data_dictHome[0]['endHour'])
             
             
             
@@ -233,7 +279,7 @@ class TelegramClass(threading.Thread):
                 
                 ])
 
-            x = self.bot.sendMessage(from_id, 'Usa il menu per scegliere azione schedule', reply_markup=keyboard)
+            x = self.bot.sendMessage(from_id, 'Use the menu below', reply_markup=keyboard)
        
 
         #modifca fascia oraria in base alla scelta 
@@ -243,7 +289,7 @@ class TelegramClass(threading.Thread):
             params = {
                 'mod' : modifica}
             query_string = urllib.parse.urlencode( params ) 
-            url = 'http://127.0.0.1:8080/getSchedules'
+            url = self.ipCatalog+ ':' +  self.portCatalog + '/getSchedules'
             url = url + "?" + query_string 
             reqHome = request.urlopen(url)
             dataHome = reqHome.read().decode('utf-8')
@@ -259,7 +305,7 @@ class TelegramClass(threading.Thread):
             params = {
                 'room' : self.deviceName}
             query_string = urllib.parse.urlencode( params ) 
-            url = 'http://127.0.0.1:8080/postSchedule'
+            url = self.ipCatalog+ ':' +  self.portCatalog + '/postSchedule'
             url = url + "?" + query_string 
 
             re = requests.post(url, 
@@ -270,27 +316,42 @@ class TelegramClass(threading.Thread):
             
 
         if query_data == "newDevice":
-            reqHome = request.urlopen('http://127.0.0.1:8080/getDevicesList')
+            params = {
+                'chatid' : self.from_id}    
+            query_string = urllib.parse.urlencode( params ) 
+            url = self.ipCatalog+ ':' +  self.portCatalog + '/getDevicesList' + "?" + query_string
+            reqHome = request.urlopen(url)
             dataHome = reqHome.read().decode('utf-8')
             devices = json.loads(dataHome)
-        
-            dev = str(len(devices)+1)
-            if int(dev) <= 3:  
+
+            reqHome = request.urlopen(self.ipCatalog+ ':' +  self.portCatalog + '/getChannels')
+            dataHome = reqHome.read().decode('utf-8')
+            channels = json.loads(dataHome)
+
+            flag = False
+            for channel in channels: 
+                if channel["status"] == "idle": 
+                    dev = channel["id"]
+                    flag = True
+
+            if flag:
                 devices.append({
                 "deviceName": "RoomSystem_" + dev,
                 "device": []
                 })
-
-
                 json_data = json.dumps( devices)
-
-                url = 'http://127.0.0.1:8080/postAddDevice'
+                
+                params = {
+                    'chatid' : self.from_id}
+                query_string = urllib.parse.urlencode( params ) 
+                url = self.ipCatalog+ ':' +  self.portCatalog + '/postAddDevice'
+                url = url + "?" + query_string 
 
                 re = requests.post(url, 
                         data = json_data,
                 )
 
-                self.bot.sendMessage(from_id, text='Device n ' + dev + " successfully added")
+                self.bot.sendMessage(from_id, text='Device RoomSystem_' + dev + " successfully added")
             else: 
                 self.bot.sendMessage(from_id, text="Out of channels")
 
@@ -298,25 +359,22 @@ class TelegramClass(threading.Thread):
 
 
         if('getHealth' in query_data):
-
-            url = 'http://127.0.0.1:8050/getHealth'
+            params = {  
+                'chatid' : self.from_id}
+            query_string = urllib.parse.urlencode( params ) 
+            url = self.ipHealth + ':' +  self.portHealth + '/getHealth'
+            url = url + "?" + query_string 
 
             reqHome = request.urlopen(url)
             dataHome = reqHome.read().decode('utf-8')
             data_dictHome = json.loads(dataHome)
+
             for i, room in enumerate(data_dictHome):
                 room = json.dumps(room)
                 self.bot.sendMessage(from_id, text = room)
 
-
-
 if __name__== "__main__":
 
-    # immagazzina il token per il got telegram renbot
-    token = '5201662282:AAEdEc4GJQMrOEpTwXNtf8OgZ1rwfak4mhg'
-    # bot = telepot.Bot(TOKEN)
-
-    tg = TelegramClass(token)
-
+    tg = TelegramClass()
     while 1:
         time.sleep(10)
