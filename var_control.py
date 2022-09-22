@@ -28,26 +28,39 @@ class Temp_monitor(threading.Thread):
     def stop(self):
         self.mqtt.stop
 
-    def notify(self, topic, msg): #TODO
+    def notify(self, topic, msg):
         payload = json.loads(msg)
-        if payload['e']['v'] > 1000: 
+        #check Temp
+        for el in payload['e']:
+            if el['v'] < 15: 
+                devName = topic.split('/')[-1]
+                params = {
+                    'room' : devName}
+                query_string = parse.urlencode( params ) 
+                url = self.ipCatalog+ ':' +  self.portCatalog + '/getSchedules'
+                url = url + "?" + query_string 
 
-            reqHome = request.urlopen(self.ipCatalog+ ':' +  self.portCatalog + '/getStatusFile')
-            dataHome = reqHome.read().decode('utf-8')
-            filename_ = json.loads(dataHome)
-            data = json.load(open(filename_["filename"]))
+                reqHome = request.urlopen(url)
+                dataHome = reqHome.read().decode('utf-8')
+                data_dictHome = json.loads(dataHome)
 
-            #check status Temp
-            for dev in data["devicesList"]:
-                if topic.split('/')[-1] == dev['deviceName']:
-                    dev["status"] = 'fail'
-            with open(filename_["filename"], "w") as file:
-                    json.dump(data, file)
+                #check schedule
+                actualTime = time.mktime(time.localtime())
+                convert = time.strftime("%H:%M:%S", time.gmtime(actualTime+7200))
+                if data_dictHome[0]['startHour']> convert and data_dictHome[0]['endHour'] < convert:  
+                    params = {
+                        'room' : devName,
+                        'status': 'on'}
+                    query_string = parse.urlencode( params ) 
+                    url = self.ipCatalog+ ':' +  self.portCatalog + '/getPower'
+                    url = url + "?" + query_string 
 
-            #serve per mandare il messaggio di apertura finestre al rasp.
-            self._paho_mqtt.publish(topic+'/act', json.dumps(msg), 2)
+                    reqHome = request.urlopen(url)
+                    # dataHome = reqHome.read().decode('utf-8')
+                    # data_dictHome = json.loads(dataHome)
 
-            self.messages.append(payload)
+                    #messaggio di accensione riscaldamento al rasp.
+                    self.sendData(devName, topic+'/act', convert, "on")
              
 
     def sendData(self, deviceName, topic, time, turnOnOff):
@@ -57,6 +70,7 @@ class Temp_monitor(threading.Thread):
         message["e"][0]["v"] = turnOnOff 
         message["e"][0]["t"] = time
         self.mqtt.publish(topic, message)  
+        print(message)
 
 
 if __name__=="__main__":
@@ -70,9 +84,8 @@ if __name__=="__main__":
     tm_mon=Temp_monitor(broker, "TempControl", portMQTT)
     tm_mon.start()
 
-
     flag = True
-    starTime = time.mktime(time.localtime)
+    starTime = time.mktime(time.localtime())
     while 1:
         actualTime = time.mktime(time.localtime())
         convert = time.strftime("%H:%M:%S", time.gmtime(actualTime+7200)) #convert actual time in hours

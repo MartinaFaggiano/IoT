@@ -13,17 +13,17 @@
         {
             "id": "3",
             "code": "https://api.thingspeak.com/channels/1824330/feeds.json?api_key=XKKSQ1368VF1O0PD&results=10",
-            "status": "busy"
+            "status": "idle"
         },
         {
             "id": "4",
             "code": "finto",
-            "status": "busy"
+            "status": "idle"
         },
         {
             "id": "5",
             "code": "finto",
-            "status": "busy"
+            "status": "idle"
         }
     ]
 }

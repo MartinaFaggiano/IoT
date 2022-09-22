@@ -211,7 +211,6 @@ class TelegramClass(threading.Thread):
                 query_string = urllib.parse.urlencode( params ) 
                 url = self.ipEnv+ ':' +  self.portEnv + '/getComfort'
                 url = url + "?" + query_string 
-
                 reqHome = request.urlopen(url)
                 dataHome = reqHome.read().decode('utf-8')
 

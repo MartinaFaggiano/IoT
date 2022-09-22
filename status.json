@@ -1,1 +1,1 @@
-{"devicesList": [{"deviceName": "RoomSystem_1", "statusCO": "fail", "power": "on"}, {"deviceName": "RoomSystem_3", "statusCO": "ok", "power": "on"}, {"deviceName": "RoomSystem_2", "statusCO": "ok", "power": "on"}, {"deviceName": "RoomSystem_5", "statusCO": "ok", "power": "on"}, {"deviceName": "RoomSystem_4", "statusCO": "ok", "power": "on"}]}
+{"devicesList": [{"deviceName": "RoomSystem_1", "statusCO": "ok", "power": "off", "status": "fail"}, {"deviceName": "RoomSystem_2", "statusCO": "ok", "power": "off", "status": "ok"}]}

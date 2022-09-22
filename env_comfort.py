@@ -55,13 +55,13 @@ class Environmental():
 
                     if temp > self.threshold and temp < 23:
                         if hum < 60 and hum > 20: 
-                            return "Temperature:"+ str(temp) + '\n"Humidity:'+ str(hum) + '\nOttimal comfort'
+                            return "Temperature:"+ str(temp) + '\nHumidity:'+ str(hum) + '\nOptimal comfort'
                         else:
-                            return "Temperature:"+ str(temp) + '\n"Humidity:'+ str(hum) + '\nHumidity level too high'
+                            return "Temperature:"+ str(temp) + '\nHumidity:'+ str(hum) + '\nHumidity level too high'
 
                     elif temp < self.threshold and str(temp) > 18:
                         if hum > 60 : 
-                            return "Temperature:"+ str(temp) + '\n"Humidity:'+ str(hum) + '\nOttimal comfort'
+                            return "Temperature:"+ str(temp) + '\n"Humidity:'+ str(hum) + '\nOptimal comfort'
                         else:
                             return "Temperature:"+ str(temp) + '\n"Humidity:'+ str(hum) + '\nHumidity level too low'
                     

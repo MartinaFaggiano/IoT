@@ -22,37 +22,9 @@
             ],
             "channel": "https://api.thingspeak.com/channels/1724512/feeds.json?api_key=GKJ4PRTW2MJ8VX1S&results=10",
             "topic": {
-                "heating": "iot/heating_sistem/RoomSystem_1",
+                "heating": "iot/heating_system/RoomSystem_1",
                 "co": "iot/co_control/RoomSystem_1",
                 "humidity": "iot/humidity_control/RoomSystem_1"
-            }
-        },
-        {
-            "deviceName": "RoomSystem_3",
-            "device": [
-                {
-                    "sensorName": "Temp",
-                    "measureType": "temp",
-                    "unit": "C"
-                },
-                {
-                    "sensorName": "Humidity",
-                    "measureType": "hum",
-                    "unit": "%"
-                },
-                {
-                    "sensorName": "CO",
-                    "measureType": "level",
-                    "unit": "%",
-                    "alarm": "off"
-                }
-            ],
-            "deviceID": 2,
-            "channel": "https://api.thingspeak.com/channels/1824330/feeds.json?api_key=XKKSQ1368VF1O0PD&results=10",
-            "topic": {
-                "heating": "iot/heating_sistem/RoomSystem_3",
-                "co": "iot/co_control/RoomSystem_3",
-                "humidity": "iot/humidity_control/RoomSystem_3"
             }
         },
         {
@@ -75,40 +47,12 @@
                     "alarm": "off"
                 }
             ],
-            "deviceID": 3,
+            "deviceID": 2,
             "channel": "https://api.thingspeak.com/channels/1824326/feeds.json?api_key=9714C6LFM0AUM6K6&results=10",
             "topic": {
-                "heating": "iot/heating_sistem/RoomSystem_2",
+                "heating": "iot/heating_system/RoomSystem_2",
                 "co": "iot/co_control/RoomSystem_2",
                 "humidity": "iot/humidity_control/RoomSystem_2"
-            }
-        },
-        {
-            "deviceName": "RoomSystem_4",
-            "device": [
-                {
-                    "sensorName": "Temp",
-                    "measureType": "temp",
-                    "unit": "C"
-                },
-                {
-                    "sensorName": "Humidity",
-                    "measureType": "hum",
-                    "unit": "%"
-                },
-                {
-                    "sensorName": "CO",
-                    "measureType": "level",
-                    "unit": "%",
-                    "alarm": "off"
-                }
-            ],
-            "deviceID": 4,
-            "channel": "finto",
-            "topic": {
-                "heating": "iot/heating_sistem/RoomSystem_4",
-                "co": "iot/co_control/RoomSystem_4",
-                "humidity": "iot/humidity_control/RoomSystem_4"
             }
         }
     ],
@@ -144,14 +88,13 @@
             "houseID": 1,
             "devicesListID": [
                 1,
-                2,
-                3
+                2
             ]
         },
         {
             "userID": 2,
             "houseID": 2,
-            "devicesList": [4]
+            "devicesList": []
         },
         {
             "userID": 2,

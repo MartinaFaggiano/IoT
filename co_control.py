@@ -7,7 +7,7 @@ from urllib import request, parse
 class CO_monitor():
     def __init__(self, broker, clientID, port, homeCatalog):
         self.mqtt = MQTT(broker, clientID, port, self)
-        self.messages = []
+        self.__message = json.load(open("dataFormat.json"))
         self.urlCatalog = homeCatalog 
 
     def start(self):
@@ -17,23 +17,26 @@ class CO_monitor():
         self.mqtt.stop
 
     def notify(self, topic, msg):
-        payload = json.loads(msg)
-        if payload['e']['v'] > 1000: 
+        payload = json.loads(msg.decode('utf-8'))
+        for el in payload['e']:
+            if el['v'] > 1000 and el['n'] == 'CO': 
 
-            reqHome = request.urlopen(self.urlCatalog+'/getStatusFile')
-            dataHome = reqHome.read().decode('utf-8')
-            filename_ = json.loads(dataHome)
-            data = json.load(open(filename_["filename"]))
+                reqHome = request.urlopen(self.urlCatalog+'/getStatusFile')
+                dataHome = reqHome.read().decode('utf-8')
+                filename_ = json.loads(dataHome)
+                data = json.load(open(filename_["filename"]))
 
-            #check status CO
-            for dev in data["devicesList"]: #TODO controllare che faccia la modifica al file
-                if topic.split('/')[-1] == dev['deviceName']:
-                    dev["status"] = 'fail'
-                    self.sendData(dev['deviceName'], topic+'/act', msg["e"][0]["t"], 2)
-            with open(filename_["filename"], "w") as file:
-                    json.dump(data, file)
+                #check status CO
+                for dev in data["devicesList"]: #TODO controllare che faccia la modifica al file
+                    if topic.split('/')[-1] == dev['deviceName']:
+                        dev["status"] = 'fail'
+                        self.sendData(dev['deviceName'], topic+'/act', el["t"])
+                    else: 
+                        dev["status"] = 'ok'
+                with open(filename_["filename"], "w") as file:
+                        json.dump(data, file)
 
-            # self.messages.append(payload)
+                # self.messages.append(payload)
 
     def sendData(self, deviceName, topic, time):
         message = self.__message
@@ -51,6 +54,7 @@ if __name__=="__main__":
 
     mon=CO_monitor(broker, "TempControl987", portMQTT, catalog)
     mon.start()
+
 
     while 1:
         params = {

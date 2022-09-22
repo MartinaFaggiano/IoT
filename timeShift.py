@@ -34,7 +34,7 @@ class TimeShiftPUB():
         message["e"][0]["v"] = turnOnOff 
         message["e"][0]["t"] = time
         self.mqtt.publish(topic, message)
-        print(message)
+        print(message,'\n',topic)
 
     def ErrorType(self, e):
         if e == 400:
@@ -77,26 +77,35 @@ if __name__=="__main__":
                 url = ipCatalog+ ':' +  portCatalog + '/getDevices'
                 url = url + "?" + query_string 
 
+                reqTopic = request.urlopen(url)
+                topic = reqTopic.read().decode('utf-8')
+                topic = topic.replace('"', '')
+
                 if convert >= startHour and convert <= endHour:
-                    reqTopic = request.urlopen(url)
-                    topic = reqTopic.read().decode('utf-8')
-                    topics = topic.replace('[', '')
-                    topics = topics.replace(']', '')
-                    topics = topics.replace('"', '')
-                    topic = topics.split(',')
                     # mon.mqtt.subscribe(topic+'/act')
                     mon.sendData(sched["deviceName"], topic+'/act', convert, "on")
 
+                    params = {
+                        'room' : sched["deviceName"],
+                        'status': 'on'}
+                    query_string = parse.urlencode( params ) 
+                    url = ipCatalog+ ':' +  portCatalog + '/getPower'
+                    url = url + "?" + query_string 
+
+                    reqHome = request.urlopen(url)  
+
                 else :
-                    reqTopic = request.urlopen(url)
-                    topic = reqTopic.read().decode('utf-8')
-                    topics = topic.replace('[', '')
-                    topics = topics.replace(']', '')
-                    topics = topics.replace('"', '')
-                    topics = topics.split(',')
-
                     # mon.mqtt.subscribe(topic+'/act')
-                    mon.sendData(sched["deviceName"], topic+'act', convert, "off")
+                    mon.sendData(sched["deviceName"], topic+'/act', convert, "off")
 
-            
+                    params = {
+                        'room' : sched["deviceName"],
+                        'status': 'off'}
+                    query_string = parse.urlencode( params ) 
+                    url = ipCatalog+ ':' +  portCatalog + '/getPower'
+                    url = url + "?" + query_string 
+
+                    reqHome = request.urlopen(url)  
+
+
             

@@ -89,9 +89,9 @@ class HomeCatalog(object):
                         if dev["deviceName"] == params["room"]:
                             if params['sensor'] == 'temp':
                                 topic = dev["topic"]['heating']
-                            elif params['sensor'] == 'humidity':
+                            elif params['sensor'] == 'hum':
                                 topic = dev["topic"]['humidity']
-                            else :
+                            elif params['sensor'] == 'co':
                                 topic = dev["topic"]['co']
                     return json.dumps(topic)
 
@@ -106,6 +106,14 @@ class HomeCatalog(object):
                             }
 
                     return json.dumps(th)
+                
+                elif uri[0] == 'getPower':
+                    json_file = json.load(open("status.json"))
+                    for dev in json_file['devicesList']:
+                        if dev["deviceName"] == params["room"]:
+                            dev['power'] = params['status']
+                    with open("status.json", "w") as file:
+                        json.dump(json_file, file)
 
             elif chiave == "rooms":
                 if uri[0] == 'getDevices':
@@ -147,6 +155,8 @@ class HomeCatalog(object):
                     if device['deviceID'] in devList: 
                         self.devices.append(device) 
                 return json.dumps(self.devices)
+            
+
                 
         
         if params=={} and len(uri)!=0:  
@@ -249,7 +259,7 @@ class HomeCatalog(object):
 
                 #aggiunta topic
                 topic = {
-                    "heating" : "iot/heating_sistem/"+ data[nDev-1]["deviceName"],
+                    "heating" : "iot/heating_system/"+ data[nDev-1]["deviceName"],
                     "co" : "iot/co_control/"+ data[nDev-1]["deviceName"],
                     "humidity" : "iot/humidity_control/"+ data[nDev-1]["deviceName"]}
                 data[nDev-1]["topic"] = topic
@@ -307,7 +317,6 @@ class HomeCatalog(object):
                         schedule["th_sup"] = data["th_sup"]
                 with open("schedule.json", "w") as file:
                     json.dump(json_file, file)
-
 
         if params=={} and len(uri)!=0:  
 
