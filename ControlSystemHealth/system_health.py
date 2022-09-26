@@ -54,7 +54,7 @@ class Health():
         
         return temp
     
-    def power_OnOff(self):
+    def power_OnOff(self,params):
         powerList = []
         params = {
             'chatid' : params["chatid"]}
@@ -80,25 +80,25 @@ class Health():
         lista_threshold = json.loads(dataHome)
 
         #informazioni su ON/OFF
-        powerList = self.power_OnOff()
+        powerList = self.power_OnOff(params)
 
         if len(params)!=0 and len(uri)!=0:
             chiave = list(params.keys())[0]
             if uri[0] == 'getHealth' and chiave == 'chatid':
                 rooms = self.call_thinkspeak(params['chatid']) 
-                for i, room in enumerate(rooms): #cicla sulle room di teamspeak filtrate dall' id della chat
+                for room in rooms: #cicla sulle room di teamspeak filtrate dall' id della chat
                     for j, rth in enumerate(lista_threshold):  #cicla sulle schedule 
                         if room["deviceName"] == rth["deviceName"]:
                             for e in powerList:
                                 powerJson = json.dumps(e)
-                                if rth["deviceName"] in powerJson and 'on' in powerJson: 
+                                if rth["deviceName"] in powerJson: 
                                     if 'on' in powerJson:
                                         if int(room["meanTemperature"]) < int(rth["th_sup"]):
                                             room["status"]= "Check the system" 
                                         else:
                                             room["status"]= "Ok" 
                                     else:
-                                        room["status"]= "Off" 
+                                        room["status"]= "The heating system is off" 
                 return json.dumps(rooms)
                 
         

@@ -1,0 +1,5 @@
+{
+    "broker":"mqtt3.thingspeak.com",
+    "port":1883,
+    "topic":"channels/1724512/publish"
+}
