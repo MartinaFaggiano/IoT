@@ -5,14 +5,17 @@ import json
 class HomeCatalog(object):
 
     def __init__(self) -> None:
-          pass
+        json_file = json.load(open("devices.json"))
+        self.nDev = json_file["devicesList"][-1]["deviceID"]
 
     exposed = True
     def GET(self, *uri, **params):
         
         if len(uri)!=0:  
+            if uri[0] == "getnDev": 
+                return str(self.nDev)
 
-            if uri[0] == "postDELDevice":  #Delete the specified devices
+            elif uri[0] == "postDELDevice":  #Delete the specified devices
                 chiave = list(params.keys())[0]
                 if chiave == 'room':
                     chatid = params['chatid']
@@ -42,7 +45,6 @@ class HomeCatalog(object):
                             devList.pop(devList.index(devID)) 
                             house['devicesListID'] = devList
                     
-                    # json_file = json.load(open("devices.json"))
                     json_file["devicesList"] = data
                     with open("devices.json", "w") as file:
                         json.dump(json_file, file)
@@ -150,31 +152,41 @@ class HomeCatalog(object):
                     if house['houseID'] == houseID: 
                         devList = list(house['devicesListID'])
 
-                self.devices = []
+                devices = []
                 for device in data["devicesList"]:
                     if device['deviceID'] in devList: 
-                        self.devices.append(device) 
-                return json.dumps(self.devices)
+                        devices.append(device) 
+                return json.dumps(devices)
+
+
+            elif chiave == 'chatid' and uri[0] == "getStatusList":  
+                data = json.load(open("devices.json"))
+
+                houseID = 0
+                for user in data['usersList']:
+                    for house in user['houses']: 
+                        if house['chatID'] == params["chatid"]: 
+                            houseID = house['houseID']
+
+                for house in data['housesList']:
+                    if house['houseID'] == houseID: 
+                        devList = list(house['devicesListID'])
+
+                statusList = json.load(open("status.json"))
+
+                statusDev = []
+                for device in statusList["devicesList"]:
+                    if device['deviceID'] in devList: 
+                        statusDev.append(device)
+
+                return json.dumps(statusDev)
             
 
                 
         
         if params=={} and len(uri)!=0:  
 
-            if uri[0] == "getDevicesFile":  
-                filename = {
-                    "filename": "devices.json"
-                    }
-                return json.dumps(filename)
-
-            elif uri[0] == "getStatusFile":  
-                filename = {
-                    "filename": "status.json"
-                    }
-                return json.dumps(filename)
-
-
-            elif uri[0] == "getSchedules":    
+            if uri[0] == "getSchedules":    
                 data = json.load(open("schedule.json"))
                 self.schedules = []
                 for schedule in data["schedules"]:
@@ -219,94 +231,99 @@ class HomeCatalog(object):
                 with open("schedule.json", "w") as file:
                     json.dump(json_file, file)
 
-            #TODO aggiungere id chat
             #crea nuovo dispositivo e aggiunge schedule di default
             if uri[0] == "postAddDevice": 
                 chiave = list(params.keys())[0]
                 if chiave == "chatid":
                     chatid = params['chatid']
 
-                nDev = len(data)
+                    data[-1]["device"] = [{
+                        "sensorName": "Temp",
+                        "measureType": "temp",
+                        "unit": "C"
+                    },
+                    {
+                        "sensorName": "Humidity",
+                        "measureType": "hum",
+                        "unit": "%"
+                    },
+                    {
+                        "sensorName": "CO",
+                        "measureType": "level",
+                        "unit": "%",
+                        "alarm" : "off"
+                    }]
+                    #aggiunta canale
+                    channels = json.load(open("channels.json"))
+                    for chan in channels["channelList"]: 
+                        if chan["id"] == data[-1]["deviceName"].split('_')[1]:
+                            data[-1]["channel"] = chan["code"]
+                            chan["status"] = "busy"
+                    with open("channels.json", "w") as file:
+                        json.dump(channels, file)   
 
-                # if nDev > 3:
-                #     return "unsuccessfully added"
-                # else:
-                data[nDev-1]["deviceID"] = nDev
-                data[nDev-1]["device"] = [{
-                    "sensorName": "Temp",
-                    "measureType": "temp",
-                    "unit": "C"
-                },
-                {
-                    "sensorName": "Humidity",
-                    "measureType": "hum",
-                    "unit": "%"
-                },
-                {
-                    "sensorName": "CO",
-                    "measureType": "level",
-                    "unit": "%",
-                    "alarm" : "off"
-                }]
-                #aggiunta canale
-                channels = json.load(open("channels.json"))
-                for chan in channels["channelList"]: 
-                    if chan["id"] == data[nDev-1]["deviceName"].split('_')[1]:
-                        data[nDev-1]["channel"] = chan["code"]
-                        chan["status"] = "busy"
-                with open("channels.json", "w") as file:
-                    json.dump(channels, file)   
+                    #aggiunta topic
+                    topic = {
+                        "heating" : "iot/heating_system/"+ data[-1]["deviceName"],
+                        "co" : "iot/co_control/"+ data[-1]["deviceName"],
+                        "humidity" : "iot/humidity_control/"+ data[-1]["deviceName"]}
+                    data[-1]["topic"] = topic
 
-                #aggiunta topic
-                topic = {
-                    "heating" : "iot/heating_system/"+ data[nDev-1]["deviceName"],
-                    "co" : "iot/co_control/"+ data[nDev-1]["deviceName"],
-                    "humidity" : "iot/humidity_control/"+ data[nDev-1]["deviceName"]}
-                data[nDev-1]["topic"] = topic
+                    json_file = json.load(open("devices.json"))
+                    json_file["devicesList"].append(data[-1])
 
-                json_file = json.load(open("devices.json"))
-                json_file["devicesList"] = data
+                    houseID = 0
+                    for user in json_file['usersList']:
+                        for house in user['houses']: 
+                            if house['chatID'] == chatid: 
+                                houseID = house['houseID']
 
-                houseID = 0
-                for user in json_file['usersList']:
-                    for house in user['houses']: 
-                        if house['chatID'] == chatid: 
-                            houseID = house['houseID']
+                    for house in json_file['housesList']:
+                        if house['houseID'] == houseID: 
+                            devList = list(house['devicesListID'])
+                            devList.append(int(data[-1]["deviceID"]))
+                            house['devicesListID'] = devList
 
-                for house in json_file['housesList']:
-                    if house['houseID'] == houseID: 
-                        devList = list(house['devicesListID'])
-                        devList.append(nDev)
-                        house['devicesListID'] = devList
+                    with open("devices.json", "w") as file:
+                        json.dump(json_file, file)
 
-                with open("devices.json", "w") as file:
-                    json.dump(json_file, file)
+                    #ggiunta schedule di default per nuovo dispositivo
+                    sched = {"deviceName": data[-1]["deviceName"],
+                    "startHour":"08:00:00",
+                    "endHour":"10:00:00",
+                    "th_inf":"18",
+                    "th_sup":"21"}
+                    json_file = json.load(open("schedule.json"))
+                    json_file["schedules"].append(sched)
+                    with open("schedule.json", "w") as file:
+                        json.dump(json_file, file)                      
 
-                #ggiunta schedule di default per nuovo dispositivo
-                sched = {"deviceName": data[nDev-1]["deviceName"],
-                "startHour":"08:00:00",
-                "endHour":"10:00:00",
-                "th_inf":"18",
-                "th_sup":"21"}
-                json_file = json.load(open("schedule.json"))
-                json_file["schedules"].append(sched)
-                with open("schedule.json", "w") as file:
-                    json.dump(json_file, file) #carica il file, aggiornando solo la lista schedules                        
+                    dataStatus = {
+                        "deviceName": data[-1]["deviceName"],
+                        "deviceID": int(data[-1]["deviceID"]),
+                        "statusCO": "ok",
+                        "power": "on"
+                    }
 
-                dataStatus = {
-                    "deviceName": data[nDev-1]["deviceName"],
-                    "statusCO": "ok",
-                    "power": "on"
-                }
+                    json_file = json.load(open("status.json"))
+                    print(json_file['devicesList'])
+                    json_file["devicesList"].append(dataStatus)
+                    with open("status.json", "w") as file:
+                        json.dump(json_file, file)
+
+                    self.nDev += 1
+                    return "successfully added"
+
+        elif uri[0] == 'postStatus':
+                room = data["room"]
+                statusCO = data["status"]
 
                 json_file = json.load(open("status.json"))
-                print(json_file['devicesList'])
-                json_file["devicesList"].append(dataStatus)
+                for dev in json_file["devicesList"]:
+                    if dev["deviceName"] == room:
+                        dev["statusCO"] = statusCO
                 with open("status.json", "w") as file:
                     json.dump(json_file, file)
-
-                return "successfully added"
-
 
         if uri[0] == 'postThreshold':
                 data = data["schedules"][0]

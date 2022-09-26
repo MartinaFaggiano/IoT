@@ -1,14 +1,6 @@
-from email import feedparser
-from fileinput import filename
-import urllib
-from urllib import request
+from urllib import request, parse
 import json
-from urllib.parse import urljoin
 import cherrypy
-
-from numpy import mean, power
-
-
 
 class Health():
     
@@ -33,7 +25,7 @@ class Health():
         params = {
             'chatid' : chatid}
 
-        query_string = urllib.parse.urlencode( params ) 
+        query_string = parse.urlencode( params ) 
         url = self.ipCatalog+ ':' +  self.portCatalog + '/getDevicesList'
         url = url + "?" + query_string 
         reqHome = request.urlopen(url)
@@ -64,12 +56,17 @@ class Health():
     
     def power_OnOff(self):
         powerList = []
-        reqHome = request.urlopen(self.ipCatalog+ ':' +  self.portCatalog + '/getStatusFile')
-        dataHome = reqHome.read().decode('utf-8')
-        filename_ = json.loads(dataHome)
-        data = json.load(open(filename_["filename"]))
+        params = {
+            'chatid' : params["chatid"]}
 
-        for e in data['devicesList']:
+        query_string = parse.urlencode( params ) 
+        url = self.ipCatalog+ ':' +  self.portCatalog + '/getStatusList'
+        url = url + "?" + query_string 
+        reqHome = request.urlopen(url)
+        dataHome = reqHome.read().decode('utf-8')
+        data = json.loads(dataHome)
+
+        for e in data:
             powerList.append({e['deviceName']: e['power']})
         return powerList
 
@@ -84,7 +81,6 @@ class Health():
 
         #informazioni su ON/OFF
         powerList = self.power_OnOff()
-        # powerJson = json.dumps(powerList)
 
         if len(params)!=0 and len(uri)!=0:
             chiave = list(params.keys())[0]
@@ -102,21 +98,17 @@ class Health():
                                         else:
                                             room["status"]= "Ok" 
                                     else:
-                                        rooms = self.call_thinkspeak() 
-                                        for i, room in enumerate(rooms):
-                                            room["status"]= "off" 
+                                        room["status"]= "Off" 
                 return json.dumps(rooms)
                 
         
 if __name__=="__main__":
-    # def run(self):
-
-        conf={
-            '/':{
-                'request.dispatch' : cherrypy.dispatch.MethodDispatcher(),
-                'tool.session.on' : True
-            }
+    conf={
+        '/':{
+            'request.dispatch' : cherrypy.dispatch.MethodDispatcher(),
+            'tool.session.on' : True
         }
-        
-        cherrypy.config.update({'server.socket_port':8050})
-        cherrypy.quickstart(Health(), '/', conf)
+    }
+    
+    cherrypy.config.update({'server.socket_port':8050})
+    cherrypy.quickstart(Health(), '/', conf)

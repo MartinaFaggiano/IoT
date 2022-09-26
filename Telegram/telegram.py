@@ -1,18 +1,8 @@
-from cgi import parse_header
-import datetime
-from http.client import ResponseNotReady
-from ipaddress import ip_network
 import json
-import logging
-import sys
 import time
-from turtle import update
-from unicodedata import name
 import threading
-from matplotlib.font_manager import json_dump
 import telepot
-import urllib
-from urllib import request
+from urllib import request, parse
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 import requests
@@ -32,8 +22,8 @@ class TelegramClass(threading.Thread):
         def run(self):
             while(1):
                 params = {
-                    'room' : 'all'}
-                query_string = urllib.parse.urlencode( params ) 
+                    'chatid' : self.from_id}
+                query_string = parse.urlencode( params ) 
                 url = self.ipEnv+ ':' +  self.portEnv + '/getCOstatus'
                 url = url + "?" + query_string 
 
@@ -103,13 +93,13 @@ class TelegramClass(threading.Thread):
 
                 json_data = json.dumps( {"schedules": [
                 {
-                    "deviceName": self.deviceName,#TODO inserire soglia temp
+                    "deviceName": self.deviceName,
                     "th_inf": self.th_inf,
                     "th_sup": self.th_sup
                 }]})  
                 params = {
                     'room' : self.deviceName}
-                query_string = urllib.parse.urlencode( params ) 
+                query_string = parse.urlencode( params ) 
                 url = self.ipCatalog+ ':' +  self.portCatalog + '/postThreshold'
                 url = url + "?" + query_string 
 
@@ -138,7 +128,7 @@ class TelegramClass(threading.Thread):
 
             params = {
                 'chatid' : self.from_id}
-            query_string = urllib.parse.urlencode( params ) 
+            query_string = parse.urlencode( params ) 
             url = self.ipCatalog+ ':' +  self.portCatalog + '/getDevicesList' + "?" + query_string
             reqHome = request.urlopen(url)
             dataHome = reqHome.read().decode('utf-8')
@@ -181,9 +171,10 @@ class TelegramClass(threading.Thread):
             self.utility = query_data
             params = {
                 'chatid' : self.from_id}
-            query_string = urllib.parse.urlencode( params ) 
+            query_string = parse.urlencode( params ) 
             url = self.ipCatalog+ ':' +  self.portCatalog + '/getDevicesList'
             url = url + "?" + query_string 
+            print(url)
             reqHome = request.urlopen(url)
             dataHome = reqHome.read().decode('utf-8')
             lista_device = json.loads(dataHome)
@@ -207,8 +198,9 @@ class TelegramClass(threading.Thread):
                 x = self.bot.sendMessage(from_id, 'Use the below menu', reply_markup=keyboard)
             elif self.utility == "getComfort":
                 params = {
+                    'chatid' : self.from_id,
                     'room' : self.deviceName}
-                query_string = urllib.parse.urlencode( params ) 
+                query_string = parse.urlencode( params ) 
                 url = self.ipEnv+ ':' +  self.portEnv + '/getComfort'
                 url = url + "?" + query_string 
                 reqHome = request.urlopen(url)
@@ -219,7 +211,7 @@ class TelegramClass(threading.Thread):
             elif self.utility == "threshold":
                 params = {
                     'room' : self.deviceName}
-                query_string = urllib.parse.urlencode( params ) 
+                query_string = parse.urlencode( params ) 
                 url = self.ipCatalog+ ':' +  self.portCatalog + '/getThreshold'
                 url = url + "?" + query_string 
 
@@ -239,7 +231,7 @@ class TelegramClass(threading.Thread):
                 params = {
                     'room' : self.deviceName,
                     'chatid' : from_id}
-                query_string = urllib.parse.urlencode( params ) 
+                query_string = parse.urlencode( params ) 
                 url = self.ipCatalog+ ':' +  self.portCatalog + '/postDELDevice'
                 url = url + "?" + query_string 
 
@@ -257,7 +249,7 @@ class TelegramClass(threading.Thread):
         if(query_data == 'get_schedule_heating'):
             params = {
                 'room' : self.deviceName}
-            query_string = urllib.parse.urlencode( params ) 
+            query_string = parse.urlencode( params ) 
             url = self.ipCatalog+ ':' +  self.portCatalog + '/getSchedules'
             url = url + "?" + query_string 
 
@@ -287,7 +279,7 @@ class TelegramClass(threading.Thread):
             modifica = query_data.split("_")[3]
             params = {
                 'mod' : modifica}
-            query_string = urllib.parse.urlencode( params ) 
+            query_string = parse.urlencode( params ) 
             url = self.ipCatalog+ ':' +  self.portCatalog + '/getSchedules'
             url = url + "?" + query_string 
             reqHome = request.urlopen(url)
@@ -297,13 +289,13 @@ class TelegramClass(threading.Thread):
 
             json_data = json.dumps( {"schedules": [
             {
-                "deviceName": self.deviceName,#TODO inserire soglia temp
+                "deviceName": self.deviceName,
                 "startHour": data_dictHome[0][0]['startHour'],
                 "endHour": data_dictHome[0][0]['endHour']
             }]})  
             params = {
                 'room' : self.deviceName}
-            query_string = urllib.parse.urlencode( params ) 
+            query_string = parse.urlencode( params ) 
             url = self.ipCatalog+ ':' +  self.portCatalog + '/postSchedule'
             url = url + "?" + query_string 
 
@@ -317,7 +309,7 @@ class TelegramClass(threading.Thread):
         if query_data == "newDevice":
             params = {
                 'chatid' : self.from_id}    
-            query_string = urllib.parse.urlencode( params ) 
+            query_string = parse.urlencode( params ) 
             url = self.ipCatalog+ ':' +  self.portCatalog + '/getDevicesList' + "?" + query_string
             reqHome = request.urlopen(url)
             dataHome = reqHome.read().decode('utf-8')
@@ -327,22 +319,28 @@ class TelegramClass(threading.Thread):
             dataHome = reqHome.read().decode('utf-8')
             channels = json.loads(dataHome)
 
+            reqHome = request.urlopen(self.ipCatalog+ ':' +  self.portCatalog + '/getnDev')
+            nDev = int(reqHome.read().decode('utf-8'))
+                    
+
             flag = False
             for channel in channels: 
                 if channel["status"] == "idle": 
-                    dev = channel["id"]
+                    dev = str(nDev + 1)
                     flag = True
 
+            devices = []
             if flag:
                 devices.append({
                 "deviceName": "RoomSystem_" + dev,
+                "deviceID": nDev + 1,
                 "device": []
                 })
                 json_data = json.dumps( devices)
                 
                 params = {
                     'chatid' : self.from_id}
-                query_string = urllib.parse.urlencode( params ) 
+                query_string = parse.urlencode( params ) 
                 url = self.ipCatalog+ ':' +  self.portCatalog + '/postAddDevice'
                 url = url + "?" + query_string 
 
@@ -360,7 +358,7 @@ class TelegramClass(threading.Thread):
         if('getHealth' in query_data):
             params = {  
                 'chatid' : self.from_id}
-            query_string = urllib.parse.urlencode( params ) 
+            query_string = parse.urlencode( params ) 
             url = self.ipHealth + ':' +  self.portHealth + '/getHealth'
             url = url + "?" + query_string 
 

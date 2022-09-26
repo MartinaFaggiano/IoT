@@ -1,0 +1,22 @@
+{
+    "devicesList": [
+        {
+            "deviceName": "RoomSystem_1",
+            "deviceID": 1,
+            "statusCO": "ok",
+            "power": "off"
+        },
+        {
+            "deviceName": "RoomSystem_2",
+            "deviceID": 2,
+            "statusCO": "ok",
+            "power": "off"
+        },
+        {
+            "deviceName": "RoomSystem_3",
+            "deviceID": 3,
+            "statusCO": "ok",
+            "power": "off"
+        }
+    ]
+}

@@ -1,11 +1,7 @@
-import re
-
-import urllib
 from MyMQTT import MQTT
 import json 
 import time
 from urllib import request, parse
-import os 
 
 class TimeShiftPUB():
     def __init__(self, broker, clientId, port):
@@ -18,14 +14,6 @@ class TimeShiftPUB():
 
     def stop(self):
         self.mqtt.stop()
-
-    # def notify(self, topic, msg):
-    #     msg = msg.decode('utf-8').replace('=', ':')
-        # print(msg)
-        # if msg != None: 
-            # payload = json.loads(msg)
-            # self.messages.append(payload)
-            # print("Measurament\n %s" % msg)
 
     def sendData(self, deviceName, topic, time, turnOnOff):
         message = self.__message
@@ -82,7 +70,6 @@ if __name__=="__main__":
                 topic = topic.replace('"', '')
 
                 if convert >= startHour and convert <= endHour:
-                    # mon.mqtt.subscribe(topic+'/act')
                     mon.sendData(sched["deviceName"], topic+'/act', convert, "on")
 
                     params = {
@@ -95,7 +82,6 @@ if __name__=="__main__":
                     reqHome = request.urlopen(url)  
 
                 else :
-                    # mon.mqtt.subscribe(topic+'/act')
                     mon.sendData(sched["deviceName"], topic+'/act', convert, "off")
 
                     params = {

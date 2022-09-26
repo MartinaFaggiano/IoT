@@ -2,6 +2,7 @@ from MyMQTT import MQTT
 import json 
 import time
 from urllib import request, parse
+import requests
 
 
 class CO_monitor():
@@ -19,24 +20,26 @@ class CO_monitor():
     def notify(self, topic, msg):
         payload = json.loads(msg.decode('utf-8'))
         for el in payload['e']:
+            devName = topic.split('/')[-1]
             if el['v'] > 1000 and el['n'] == 'CO': 
 
-                reqHome = request.urlopen(self.urlCatalog+'/getStatusFile')
-                dataHome = reqHome.read().decode('utf-8')
-                filename_ = json.loads(dataHome)
-                data = json.load(open(filename_["filename"]))
+                json_data = json.dumps({
+                    "room" : devName,
+                    "status" : "fail"
+                })
+                
+                self.sendData(devName, topic+'/act', el["t"])
 
-                #check status CO
-                for dev in data["devicesList"]: #TODO controllare che faccia la modifica al file
-                    if topic.split('/')[-1] == dev['deviceName']:
-                        dev["status"] = 'fail'
-                        self.sendData(dev['deviceName'], topic+'/act', el["t"])
-                    else: 
-                        dev["status"] = 'ok'
-                with open(filename_["filename"], "w") as file:
-                        json.dump(data, file)
+            else: 
 
-                # self.messages.append(payload)
+                json_data = json.dumps({
+                    "room" : topic.split('/')[-1],
+                    "status" : "ok"
+                })
+                
+            url = self.urlCatalog + '/postStatus'
+            reqHome = requests.post(url, data = json_data)
+
 
     def sendData(self, deviceName, topic, time):
         message = self.__message

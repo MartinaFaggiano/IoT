@@ -1,5 +1,3 @@
-from concurrent.futures import thread
-from threading import Thread
 from MyMQTT import MQTT
 import json 
 import time
@@ -15,12 +13,6 @@ class Temp_monitor(threading.Thread):
         conf = json.load(open("conf.json"))        
         self.ipCatalog = conf.get("rest")["HomeCatalog"]["ip"]
         self.portCatalog = conf.get("rest")["HomeCatalog"]["port"]
-
-        # self.ipHealth = conf.get("rest")["Health"]["ip"]
-        # self.portHealth = conf.get("rest")["Health"]["port"]
-
-        # self.ipEnv = conf.get("rest")["Env"]["ip"]
-        # self.portEnv = conf.get("rest")["Env"]["port"]
 
     def start(self):
         self.mqtt.start()
@@ -56,8 +48,6 @@ class Temp_monitor(threading.Thread):
                     url = url + "?" + query_string 
 
                     reqHome = request.urlopen(url)
-                    # dataHome = reqHome.read().decode('utf-8')
-                    # data_dictHome = json.loads(dataHome)
 
                     #messaggio di accensione riscaldamento al rasp.
                     self.sendData(devName, topic+'/act', convert, "on")

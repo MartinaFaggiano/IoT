@@ -29,6 +29,7 @@
         },
         {
             "deviceName": "RoomSystem_2",
+            "deviceID": 2,
             "device": [
                 {
                     "sensorName": "Temp",
@@ -47,12 +48,39 @@
                     "alarm": "off"
                 }
             ],
-            "deviceID": 2,
             "channel": "https://api.thingspeak.com/channels/1824326/feeds.json?api_key=9714C6LFM0AUM6K6&results=10",
             "topic": {
                 "heating": "iot/heating_system/RoomSystem_2",
                 "co": "iot/co_control/RoomSystem_2",
                 "humidity": "iot/humidity_control/RoomSystem_2"
+            }
+        },
+        {
+            "deviceName": "RoomSystem_3",
+            "deviceID": 3,
+            "device": [
+                {
+                    "sensorName": "Temp",
+                    "measureType": "temp",
+                    "unit": "C"
+                },
+                {
+                    "sensorName": "Humidity",
+                    "measureType": "hum",
+                    "unit": "%"
+                },
+                {
+                    "sensorName": "CO",
+                    "measureType": "level",
+                    "unit": "%",
+                    "alarm": "off"
+                }
+            ],
+            "channel": "https://api.thingspeak.com/channels/1824330/feeds.json?api_key=XKKSQ1368VF1O0PD&results=10",
+            "topic": {
+                "heating": "iot/heating_system/RoomSystem_3",
+                "co": "iot/co_control/RoomSystem_3",
+                "humidity": "iot/humidity_control/RoomSystem_3"
             }
         }
     ],
@@ -88,13 +116,15 @@
             "houseID": 1,
             "devicesListID": [
                 1,
-                2
+                3
             ]
         },
         {
             "userID": 2,
             "houseID": 2,
-            "devicesList": []
+            "devicesList": [
+                2
+            ]
         },
         {
             "userID": 2,

@@ -13,6 +13,13 @@
             "endHour": "10:00:00",
             "th_inf": "18",
             "th_sup": "21"
+        },
+        {
+            "deviceName": "RoomSystem_3",
+            "startHour": "08:00:00",
+            "endHour": "10:00:00",
+            "th_inf": "15",
+            "th_sup": "21"
         }
     ],
     "modify_schedules": [
@@ -20,7 +27,7 @@
             "morning": [
                 {
                     "startHour": "08:00:00",
-                    "endHour": "10:00:00"
+                    "endHour": "11:00:00"
                 }
             ],
             "afternoon": [
