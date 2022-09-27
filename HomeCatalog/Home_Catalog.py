@@ -28,7 +28,9 @@ class HomeCatalog(object):
                         else: 
                             channels = json.load(open("channels.json"))
                             num =  nDev.split('_')[1]
-                            channels["channelList"][int(num)-1]["status"] = "idle"
+                            for channel in channels["channelList"]: 
+                                if e["channel"] in channel["code"]: 
+                                    channel["status"] = "idle"
                             devID = e['deviceID']
 
                             with open("channels.json", "w") as file:
